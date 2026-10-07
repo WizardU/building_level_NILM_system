@@ -1,0 +1,21 @@
+{
+  "appliance": "microwave",
+  "model_name": "attention",
+  "stats": {
+    "agg_mean": 176.3984832763672,
+    "agg_std": 263.42578125,
+    "y_mean": 2.385688543319702,
+    "y_std": 53.51359176635742
+  },
+  "window_size": 599,
+  "metrics": {
+    "mae": 1.9178011417388916,
+    "sae": 4027382272.0,
+    "accuracy": 1.0,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "train_loss": 0.1470229618751515
+  },
+  "onnx": "microwave_attention.onnx"
+}

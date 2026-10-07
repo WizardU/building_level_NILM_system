@@ -1,0 +1,18 @@
+[
+  {
+    "train": "synth_house1 / UK-DALE-1",
+    "test": "synth_house1 holdout",
+    "model": "attention",
+    "mae": 58.6656,
+    "f1": 0.15,
+    "note": "same-domain"
+  },
+  {
+    "train": "synth_house1 / UK-DALE-1",
+    "test": "REDD / UK-DALE-2 (TODO)",
+    "model": "attention",
+    "mae": null,
+    "f1": null,
+    "note": "cross-domain placeholder \u2014 run ukdale.py + train_all"
+  }
+]

@@ -1,0 +1,1677 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Building-Level NILM System API",
+    "description": "RESTful API for a building-level Non-Intrusive Load Monitoring (NILM) system. Supports building, floor, zone, meter, event, disaggregation, appliance, and analytics modules.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "NILM Project Team"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.nilm-system.com/api/v1",
+      "description": "Production server"
+    },
+    {
+      "url": "http://localhost:8000/api/v1",
+      "description": "Local development server"
+    }
+  ],
+  "tags": [
+    { "name": "Auth", "description": "Authentication and authorization" },
+    { "name": "Buildings", "description": "Building, floor, and zone management" },
+    { "name": "Meters", "description": "Meter management" },
+    { "name": "Measurements", "description": "Data acquisition and query" },
+    { "name": "Events", "description": "Event detection" },
+    { "name": "Disaggregation", "description": "Energy disaggregation" },
+    { "name": "Appliances", "description": "Appliance management" },
+    { "name": "Analytics", "description": "Statistics and reporting" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 200 },
+          "message": { "type": "string", "example": "success" },
+          "data": { "type": "object", "nullable": true },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["username", "password"],
+        "properties": {
+          "username": { "type": "string", "example": "admin" },
+          "password": { "type": "string", "format": "password", "example": "******" }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "access_token": { "type": "string" },
+          "refresh_token": { "type": "string" },
+          "expires_in": { "type": "integer", "example": 3600 },
+          "user": { "$ref": "#/components/schemas/User" }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "username": { "type": "string", "example": "admin" },
+          "role": {
+            "type": "string",
+            "enum": ["system_admin", "building_admin", "tenant"],
+            "example": "building_admin"
+          },
+          "building_ids": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "example": [1, 2]
+          }
+        }
+      },
+      "Building": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "example": "Building A" },
+          "address": { "type": "string", "example": "No.1 XX Road" },
+          "floors_count": { "type": "integer", "example": 10 },
+          "meters_count": { "type": "integer", "example": 12 },
+          "total_power_kw": { "type": "number", "example": 45.6 },
+          "status": {
+            "type": "string",
+            "enum": ["online", "offline"],
+            "example": "online"
+          }
+        }
+      },
+      "Floor": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "building_id": { "type": "integer", "example": 1 },
+          "floor_number": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "example": "Floor 1" },
+          "zones_count": { "type": "integer", "example": 4 }
+        }
+      },
+      "Zone": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "floor_id": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "example": "Office Zone A" },
+          "type": {
+            "type": "string",
+            "enum": ["office", "corridor", "utility", "public"],
+            "example": "office"
+          }
+        }
+      },
+      "Meter": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 101 },
+          "name": { "type": "string", "example": "Building A - Floor 1 Main Meter" },
+          "type": {
+            "type": "string",
+            "enum": ["single_phase", "three_phase"],
+            "example": "three_phase"
+          },
+          "location": {
+            "type": "object",
+            "properties": {
+              "building_id": { "type": "integer", "example": 1 },
+              "floor_id": { "type": "integer", "example": 1 },
+              "zone_id": { "type": "integer", "nullable": true, "example": null }
+            }
+          },
+          "sampling_rate_hz": { "type": "integer", "example": 1 },
+          "protocol": {
+            "type": "string",
+            "enum": ["modbus_tcp", "modbus_rtu", "mqtt", "http"],
+            "example": "modbus_tcp"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["online", "offline"],
+            "example": "online"
+          },
+          "last_seen": { "type": "string", "format": "date-time" },
+          "current": { "$ref": "#/components/schemas/MeterCurrent" }
+        }
+      },
+      "MeterCurrent": {
+        "type": "object",
+        "properties": {
+          "phase_a": { "$ref": "#/components/schemas/PhaseData" },
+          "phase_b": { "$ref": "#/components/schemas/PhaseData" },
+          "phase_c": { "$ref": "#/components/schemas/PhaseData" },
+          "total_power_kw": { "type": "number", "example": 7.98 }
+        }
+      },
+      "PhaseData": {
+        "type": "object",
+        "properties": {
+          "voltage": { "type": "number", "example": 220.5 },
+          "current": { "type": "number", "example": 12.3 },
+          "power_kw": { "type": "number", "example": 2.71 }
+        }
+      },
+      "MeasurementSample": {
+        "type": "object",
+        "properties": {
+          "timestamp": { "type": "string", "format": "date-time" },
+          "phase_a": { "$ref": "#/components/schemas/PhaseData" },
+          "phase_b": { "$ref": "#/components/schemas/PhaseData" },
+          "phase_c": { "$ref": "#/components/schemas/PhaseData" }
+        }
+      },
+      "Event": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 5001 },
+          "meter_id": { "type": "integer", "example": 101 },
+          "timestamp": { "type": "string", "format": "date-time" },
+          "type": {
+            "type": "string",
+            "enum": ["on", "off", "state_change"],
+            "example": "on"
+          },
+          "phase": {
+            "type": "string",
+            "enum": ["a", "b", "c"],
+            "example": "a"
+          },
+          "delta_power_kw": { "type": "number", "example": 1.2 },
+          "delta_reactive_kvar": { "type": "number", "example": 0.3 },
+          "appliance_guess": { "type": "string", "example": "air_conditioner" },
+          "confidence": { "type": "number", "example": 0.87 }
+        }
+      },
+      "DisaggregationResult": {
+        "type": "object",
+        "properties": {
+          "meter_id": { "type": "integer", "example": 101 },
+          "period": { "type": "string", "example": "2026-10-07" },
+          "total_energy_kwh": { "type": "number", "example": 45.6 },
+          "appliances": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ApplianceEnergy" }
+          }
+        }
+      },
+      "ApplianceEnergy": {
+        "type": "object",
+        "properties": {
+          "appliance_id": { "type": "integer", "example": 201 },
+          "type": { "type": "string", "example": "air_conditioner" },
+          "name": { "type": "string", "example": "Floor 1 AC Unit" },
+          "energy_kwh": { "type": "number", "example": 18.2 },
+          "percentage": { "type": "number", "example": 39.9 },
+          "runtime_hours": { "type": "number", "example": 8.5 },
+          "series": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "timestamp": { "type": "string", "format": "date-time" },
+                "power_kw": { "type": "number", "example": 2.1 }
+              }
+            }
+          }
+        }
+      },
+      "Appliance": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 201 },
+          "name": { "type": "string", "example": "Floor 1 AC Unit" },
+          "type": { "type": "string", "example": "air_conditioner" },
+          "meter_id": { "type": "integer", "example": 101 },
+          "zone_id": { "type": "integer", "nullable": true, "example": 1 },
+          "rated_power_kw": { "type": "number", "example": 3.5 }
+        }
+      },
+      "UsageRecord": {
+        "type": "object",
+        "properties": {
+          "start": { "type": "string", "format": "date-time" },
+          "end": { "type": "string", "format": "date-time" },
+          "duration_hours": { "type": "number", "example": 4.5 },
+          "energy_kwh": { "type": "number", "example": 9.45 },
+          "avg_power_kw": { "type": "number", "example": 2.1 }
+        }
+      },
+      "AnalyticsOverview": {
+        "type": "object",
+        "properties": {
+          "building_id": { "type": "integer", "example": 1 },
+          "timestamp": { "type": "string", "format": "date-time" },
+          "total_power_kw": { "type": "number", "example": 45.6 },
+          "today_energy_kwh": { "type": "number", "example": 320.5 },
+          "month_energy_kwh": { "type": "number", "example": 8960.2 },
+          "active_appliances": { "type": "integer", "example": 28 },
+          "floors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "floor_id": { "type": "integer", "example": 1 },
+                "power_kw": { "type": "number", "example": 12.3 },
+                "energy_kwh": { "type": "number", "example": 85.6 }
+              }
+            }
+          },
+          "top_appliances": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "appliance_id": { "type": "integer", "example": 201 },
+                "name": { "type": "string", "example": "Floor 1 AC Unit" },
+                "power_kw": { "type": "number", "example": 2.1 }
+              }
+            }
+          },
+          "alerts_count": { "type": "integer", "example": 3 }
+        }
+      },
+      "Alert": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "meter_id": { "type": "integer", "example": 101 },
+          "appliance_id": { "type": "integer", "nullable": true, "example": 201 },
+          "type": {
+            "type": "string",
+            "enum": ["over_power", "long_running", "abnormal"],
+            "example": "over_power"
+          },
+          "message": {
+            "type": "string",
+            "example": "Floor 1 AC Unit power exceeds rated value"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["info", "warning", "critical"],
+            "example": "warning"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "resolved"],
+            "example": "active"
+          },
+          "created_at": { "type": "string", "format": "date-time" },
+          "resolved_at": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 400 },
+          "message": { "type": "string", "example": "Invalid parameter: meter_id" },
+          "data": { "type": "object", "nullable": true, "example": null },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    { "BearerAuth": [] }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "User login",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/LoginResponse" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "User logout",
+        "responses": {
+          "200": {
+            "description": "Logout successful",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Refresh access token",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["refresh_token"],
+                "properties": {
+                  "refresh_token": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token refreshed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/LoginResponse" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Get current user information",
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/User" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/buildings": {
+      "get": {
+        "tags": ["Buildings"],
+        "summary": "List buildings",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "size", "in": "query", "schema": { "type": "integer", "default": 20 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "total": { "type": "integer", "example": 2 },
+                            "items": {
+                              "type": "array",
+                              "items": { "$ref": "#/components/schemas/Building" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "post": {
+        "tags": ["Buildings"],
+        "summary": "Create a building",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string", "example": "Building B" },
+                  "address": { "type": "string", "example": "No.2 XX Road" },
+                  "floors_count": { "type": "integer", "example": 8 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/Building" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid parameters" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/buildings/{id}": {
+      "get": {
+        "tags": ["Buildings"],
+        "summary": "Get building details",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/Building" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "put": {
+        "tags": ["Buildings"],
+        "summary": "Update a building",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Building" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "delete": {
+        "tags": ["Buildings"],
+        "summary": "Delete a building",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/buildings/{id}/floors": {
+      "get": {
+        "tags": ["Buildings"],
+        "summary": "List floors of a building",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/Floor" }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Buildings"],
+        "summary": "Create a floor",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["floor_number"],
+                "properties": {
+                  "floor_number": { "type": "integer", "example": 11 },
+                  "name": { "type": "string", "example": "Floor 11" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/Floor" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/floors/{id}/zones": {
+      "get": {
+        "tags": ["Buildings"],
+        "summary": "List zones of a floor",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/Zone" }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Buildings"],
+        "summary": "Create a zone",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string", "example": "Office Zone B" },
+                  "type": {
+                    "type": "string",
+                    "enum": ["office", "corridor", "utility", "public"],
+                    "example": "office"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/Zone" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/meters": {
+      "get": {
+        "tags": ["Meters"],
+        "summary": "List meters",
+        "parameters": [
+          { "name": "building_id", "in": "query", "schema": { "type": "integer" } },
+          { "name": "floor_id", "in": "query", "schema": { "type": "integer" } },
+          { "name": "zone_id", "in": "query", "schema": { "type": "integer" } },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["online", "offline"] }
+          },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "size", "in": "query", "schema": { "type": "integer", "default": 20 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "total": { "type": "integer", "example": 12 },
+                            "items": {
+                              "type": "array",
+                              "items": { "$ref": "#/components/schemas/Meter" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Meters"],
+        "summary": "Register a meter",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Meter" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/Meter" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/meters/{id}": {
+      "get": {
+        "tags": ["Meters"],
+        "summary": "Get meter details",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/Meter" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "put": {
+        "tags": ["Meters"],
+        "summary": "Update meter configuration",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Meter" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Meters"],
+        "summary": "Delete a meter",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/meters/{id}/status": {
+      "get": {
+        "tags": ["Meters"],
+        "summary": "Get meter real-time status",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/MeterCurrent" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/measurements/realtime": {
+      "get": {
+        "tags": ["Measurements"],
+        "summary": "Get real-time power data",
+        "parameters": [
+          {
+            "name": "meter_ids",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "101,102"
+          },
+          {
+            "name": "metrics",
+            "in": "query",
+            "schema": { "type": "string" },
+            "example": "power,voltage"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "meter_id": { "type": "integer", "example": 101 },
+                              "current": { "$ref": "#/components/schemas/MeterCurrent" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/measurements/history": {
+      "get": {
+        "tags": ["Measurements"],
+        "summary": "Get historical measurement data",
+        "parameters": [
+          { "name": "meter_id", "in": "query", "required": true, "schema": { "type": "integer" } },
+          {
+            "name": "start",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "format": "date-time" }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "format": "date-time" }
+          },
+          { "name": "interval", "in": "query", "schema": { "type": "string", "example": "1h" } },
+          {
+            "name": "metrics",
+            "in": "query",
+            "schema": { "type": "string", "example": "power,energy" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "meter_id": { "type": "integer" },
+                            "interval": { "type": "string" },
+                            "series": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "timestamp": { "type": "string", "format": "date-time" },
+                                  "power_kw": { "type": "number" },
+                                  "energy_kwh": { "type": "number" }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/measurements/upload": {
+      "post": {
+        "tags": ["Measurements"],
+        "summary": "Upload measurement data from edge node",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["meter_id", "samples"],
+                "properties": {
+                  "meter_id": { "type": "integer", "example": 101 },
+                  "edge_node_id": { "type": "string", "example": "edge-001" },
+                  "samples": {
+                    "type": "array",
+                    "items": { "$ref": "#/components/schemas/MeasurementSample" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Uploaded",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/events": {
+      "get": {
+        "tags": ["Events"],
+        "summary": "List events",
+        "parameters": [
+          { "name": "meter_id", "in": "query", "schema": { "type": "integer" } },
+          {
+            "name": "start",
+            "in": "query",
+            "schema": { "type": "string", "format": "date-time" }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "schema": { "type": "string", "format": "date-time" }
+          },
+          { "name": "type", "in": "query", "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "size", "in": "query", "schema": { "type": "integer", "default": 50 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "total": { "type": "integer", "example": 128 },
+                            "items": {
+                              "type": "array",
+                              "items": { "$ref": "#/components/schemas/Event" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/events/{id}": {
+      "get": {
+        "tags": ["Events"],
+        "summary": "Get event details",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/Event" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/events/upload": {
+      "post": {
+        "tags": ["Events"],
+        "summary": "Upload events from edge node",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["meter_id", "events"],
+                "properties": {
+                  "meter_id": { "type": "integer", "example": 101 },
+                  "events": {
+                    "type": "array",
+                    "items": { "$ref": "#/components/schemas/Event" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Uploaded",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/disaggregation/result": {
+      "get": {
+        "tags": ["Disaggregation"],
+        "summary": "Get disaggregation result",
+        "parameters": [
+          { "name": "meter_id", "in": "query", "required": true, "schema": { "type": "integer" } },
+          {
+            "name": "start",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "format": "date-time" }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "format": "date-time" }
+          },
+          { "name": "appliance_types", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/DisaggregationResult" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/disaggregation/run": {
+      "post": {
+        "tags": ["Disaggregation"],
+        "summary": "Trigger a disaggregation task",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["meter_id", "start", "end"],
+                "properties": {
+                  "meter_id": { "type": "integer", "example": 101 },
+                  "start": { "type": "string", "format": "date-time" },
+                  "end": { "type": "string", "format": "date-time" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Task accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "task_id": { "type": "string", "example": "task-20261007-001" }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/disaggregation/status/{task_id}": {
+      "get": {
+        "tags": ["Disaggregation"],
+        "summary": "Query disaggregation task status",
+        "parameters": [
+          { "name": "task_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "task_id": { "type": "string" },
+                            "status": { "type": "string", "example": "completed" },
+                            "progress": { "type": "integer", "example": 100 }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/appliances": {
+      "get": {
+        "tags": ["Appliances"],
+        "summary": "List appliances",
+        "parameters": [
+          { "name": "meter_id", "in": "query", "schema": { "type": "integer" } },
+          { "name": "type", "in": "query", "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "size", "in": "query", "schema": { "type": "integer", "default": 20 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "total": { "type": "integer", "example": 28 },
+                            "items": {
+                              "type": "array",
+                              "items": { "$ref": "#/components/schemas/Appliance" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Appliances"],
+        "summary": "Register an appliance",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Appliance" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/Appliance" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/appliances/{id}": {
+      "get": {
+        "tags": ["Appliances"],
+        "summary": "Get appliance details",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/Appliance" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "put": {
+        "tags": ["Appliances"],
+        "summary": "Update an appliance",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Appliance" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Appliances"],
+        "summary": "Delete an appliance",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/appliances/{id}/usage": {
+      "get": {
+        "tags": ["Appliances"],
+        "summary": "Get appliance usage records",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "appliance_id": { "type": "integer" },
+                            "usage_records": {
+                              "type": "array",
+                              "items": { "$ref": "#/components/schemas/UsageRecord" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/overview": {
+      "get": {
+        "tags": ["Analytics"],
+        "summary": "Get analytics overview",
+        "parameters": [
+          { "name": "building_id", "in": "query", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/AnalyticsOverview" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/energy": {
+      "get": {
+        "tags": ["Analytics"],
+        "summary": "Get energy statistics",
+        "parameters": [
+          { "name": "building_id", "in": "query", "schema": { "type": "integer" } },
+          { "name": "meter_id", "in": "query", "schema": { "type": "integer" } },
+          {
+            "name": "start",
+            "in": "query",
+            "schema": { "type": "string", "format": "date-time" }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "schema": { "type": "string", "format": "date-time" }
+          },
+          { "name": "granularity", "in": "query", "schema": { "type": "string", "example": "day" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/alerts": {
+      "get": {
+        "tags": ["Analytics"],
+        "summary": "List alerts",
+        "parameters": [
+          { "name": "building_id", "in": "query", "schema": { "type": "integer" } },
+          { "name": "status", "in": "query", "schema": { "type": "string" } },
+          { "name": "severity", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ApiResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/Alert" }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/reports": {
+      "post": {
+        "tags": ["Analytics"],
+        "summary": "Generate a report",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["building_id", "start", "end", "type"],
+                "properties": {
+                  "building_id": { "type": "integer", "example": 1 },
+                  "start": { "type": "string", "format": "date-time" },
+                  "end": { "type": "string", "format": "date-time" },
+                  "type": { "type": "string", "example": "daily" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Report generation accepted",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

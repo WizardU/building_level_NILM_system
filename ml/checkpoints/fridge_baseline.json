@@ -1,0 +1,21 @@
+{
+  "appliance": "fridge",
+  "model_name": "baseline",
+  "stats": {
+    "agg_mean": 176.3984832763672,
+    "agg_std": 263.42578125,
+    "y_mean": 40.48735427856445,
+    "y_std": 56.82472229003906
+  },
+  "window_size": 599,
+  "metrics": {
+    "mae": 6.728291034698486,
+    "sae": 0.04204312339425087,
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "train_loss": 0.5102095268982447
+  },
+  "onnx": "fridge_baseline.onnx"
+}

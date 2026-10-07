@@ -1,0 +1,3 @@
+train,test,model,mae,f1,note
+synth_house1 / UK-DALE-1,synth_house1 holdout,attention,58.6656,0.15,same-domain
+synth_house1 / UK-DALE-1,REDD / UK-DALE-2 (TODO),attention,,,cross-domain placeholder — run ukdale.py + train_all

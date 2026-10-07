@@ -1,0 +1,21 @@
+{
+  "appliance": "kettle",
+  "model_name": "baseline",
+  "stats": {
+    "agg_mean": 176.3984832763672,
+    "agg_std": 263.42578125,
+    "y_mean": 13.392659187316895,
+    "y_std": 154.6917724609375
+  },
+  "window_size": 599,
+  "metrics": {
+    "mae": 44.4663200378418,
+    "sae": 22391633920.0,
+    "accuracy": 1.0,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "train_loss": 0.6509340641057213
+  },
+  "onnx": "kettle_baseline.onnx"
+}

@@ -1,0 +1,45 @@
+services:
+  db:
+    image: timescale/timescaledb:latest-pg16
+    environment:
+      POSTGRES_USER: nilm
+      POSTGRES_PASSWORD: nilm
+      POSTGRES_DB: nilm
+    ports:
+      - "5432:5432"
+    volumes:
+      - nilm_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nilm -d nilm"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://nilm:nilm@db:5432/nilm
+      JWT_SECRET: nilm-dev-secret-change-me
+      MODEL_DIR: /models
+      CORS_ORIGINS: "*"
+      SEED_DEMO: "1"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./ml/checkpoints:/models:ro
+      - ./data:/data:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./web
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  nilm_pgdata:

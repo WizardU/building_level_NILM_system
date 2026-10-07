@@ -1,0 +1,21 @@
+{
+  "appliance": "fridge",
+  "model_name": "dilated",
+  "stats": {
+    "agg_mean": 176.3984832763672,
+    "agg_std": 263.42578125,
+    "y_mean": 40.48735427856445,
+    "y_std": 56.82472229003906
+  },
+  "window_size": 599,
+  "metrics": {
+    "mae": 14.316583633422852,
+    "sae": 0.12598398327827454,
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "train_loss": 1.0366759578050193
+  },
+  "onnx": "fridge_dilated.onnx"
+}

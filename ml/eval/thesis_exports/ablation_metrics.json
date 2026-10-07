@@ -1,0 +1,74 @@
+[
+  {
+    "appliance": "dishwasher",
+    "model": "attention",
+    "mae": 114.28257751464844,
+    "sae": 1.0,
+    "f1": 0.0,
+    "accuracy": 0.7142857142857143
+  },
+  {
+    "appliance": "fridge",
+    "model": "attention",
+    "mae": 29.639270782470703,
+    "sae": 0.20203766226768494,
+    "f1": 0.7499999999999999,
+    "accuracy": 0.8095238095238095
+  },
+  {
+    "appliance": "fridge",
+    "model": "baseline",
+    "mae": 27.735183715820312,
+    "sae": 0.29256829619407654,
+    "f1": 0.7499999999999999,
+    "accuracy": 0.8095238095238095
+  },
+  {
+    "appliance": "fridge",
+    "model": "dilated",
+    "mae": 37.7108154296875,
+    "sae": 0.6798349618911743,
+    "f1": 0.7058823529411764,
+    "accuracy": 0.7619047619047619
+  },
+  {
+    "appliance": "kettle",
+    "model": "attention",
+    "mae": 4.754847049713135,
+    "sae": 1.0,
+    "f1": 0.0,
+    "accuracy": 1.0
+  },
+  {
+    "appliance": "kettle",
+    "model": "baseline",
+    "mae": 30.6043701171875,
+    "sae": 1.0,
+    "f1": 0.0,
+    "accuracy": 1.0
+  },
+  {
+    "appliance": "kettle",
+    "model": "dilated",
+    "mae": 16.519784927368164,
+    "sae": 1.0,
+    "f1": 0.0,
+    "accuracy": 1.0
+  },
+  {
+    "appliance": "microwave",
+    "model": "attention",
+    "mae": 2.794375419616699,
+    "sae": 1.0,
+    "f1": 0.0,
+    "accuracy": 1.0
+  },
+  {
+    "appliance": "washing_machine",
+    "model": "attention",
+    "mae": 141.85675048828125,
+    "sae": 1.0,
+    "f1": 0.0,
+    "accuracy": 0.7142857142857143
+  }
+]

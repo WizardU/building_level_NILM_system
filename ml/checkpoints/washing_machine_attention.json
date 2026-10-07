@@ -1,0 +1,21 @@
+{
+  "appliance": "washing_machine",
+  "model_name": "attention",
+  "stats": {
+    "agg_mean": 176.3984832763672,
+    "agg_std": 263.42578125,
+    "y_mean": 0.0,
+    "y_std": 9.999999974752427e-07
+  },
+  "window_size": 599,
+  "metrics": {
+    "mae": 4.34094937773466e-09,
+    "sae": 4.922242641448975,
+    "accuracy": 1.0,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "train_loss": 0.03081704075376072
+  },
+  "onnx": "washing_machine_attention.onnx"
+}
