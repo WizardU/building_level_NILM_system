@@ -27,23 +27,36 @@ APPLIANCE_LABELS = {
 }
 
 
+from app.services.legacy_inference import LegacyInferenceEngine
+
+
 class DisaggregationService:
     def __init__(self) -> None:
         self.engine = None
+        self.legacy_engine = None
         self._try_load()
 
     def _try_load(self) -> None:
+        # 1) prefer ONNX models from the main pipeline
         model_dir = Path(settings.model_dir)
-        if not model_dir.exists():
-            return
-        try:
-            from inference.engine import InferenceEngine
+        if model_dir.exists():
+            try:
+                from inference.engine import InferenceEngine
 
-            eng = InferenceEngine(model_dir)
-            if eng.appliances:
-                self.engine = eng
+                eng = InferenceEngine(model_dir)
+                if eng.appliances:
+                    self.engine = eng
+                    return
+            except Exception:
+                self.engine = None
+
+        # 2) fallback to Nilm.rar PyTorch checkpoints
+        try:
+            legacy = LegacyInferenceEngine()
+            if legacy.appliances:
+                self.legacy_engine = legacy
         except Exception:
-            self.engine = None
+            self.legacy_engine = None
 
     def reload(self) -> None:
         self._try_load()
@@ -79,6 +92,9 @@ class DisaggregationService:
         if self.engine and self.engine.appliances:
             series_map = self.engine.disaggregate_series(agg, stride=max(stride, 1))
             confidence = 0.94
+        elif self.legacy_engine and self.legacy_engine.appliances:
+            series_map = self.legacy_engine.disaggregate_series(agg)
+            confidence = 0.88
         else:
             series_map = self._heuristic(agg)
             confidence = 0.75

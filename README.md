@@ -119,3 +119,32 @@ python -m streamlit run app.py
 1. Start backend (seeds Building A / Floor 1 / Meter 101).
 2. `python -m adapters.replay.cli --meter-id 101 --speed 20`
 3. Open Dashboard → live mains + appliance stack; Evaluation → metrics; Analytics → energy share.
+
+## Using the Nilm.rar legacy reference inside the demo
+
+The FastAPI backend can fall back to the `ml/legacy_nilm` PyTorch checkpoints when no ONNX models exist. To set this up:
+
+```bash
+# 1) Train legacy checkpoints
+cd ml/legacy_nilm
+python -m venv .venv
+.venv\Scripts\pip install -r requirements.txt
+python make_demo_data.py
+python train.py --appliance kettle --model seq2point --epochs 6
+python train.py --appliance microwave --model seq2point --epochs 6
+python train.py --appliance washing_machine --model seq2point --epochs 6
+python train.py --appliance fridge --model seq2point --epochs 6
+
+# 2) Import the demo aggregate data into the backend DB
+cd ../..
+backend/.venv/Scripts/python scripts/import_legacy_data.py
+
+# 3) Start backend (it auto-discovers ml/legacy_nilm/outputs/checkpoints/*.pt)
+cd backend
+.venv\Scripts\uvicorn app.main:app --reload --port 8000
+```
+
+Notes:
+
+- `backend/requirements.txt` includes `pandas`; `torch` is optional and only needed when you want the backend to serve legacy `.pt` checkpoints directly.
+- If `torch` is not installed in the backend venv, the legacy fallback is skipped and the heuristic fallback is used instead.

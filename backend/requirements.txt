@@ -9,5 +9,8 @@ passlib[bcrypt]>=1.7
 bcrypt>=4.0,<4.1
 python-multipart>=0.0.9
 numpy>=1.24
+pandas>=2.0
 onnxruntime>=1.16
 httpx>=0.27
+# Optional: torch only needed to run Nilm.rar legacy .pt checkpoints from backend
+# torch>=2.0
