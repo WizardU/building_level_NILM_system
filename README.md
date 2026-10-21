@@ -146,5 +146,5 @@ cd backend
 
 Notes:
 
-- `backend/requirements.txt` includes `pandas`; `torch` is optional and only needed when you want the backend to serve legacy `.pt` checkpoints directly.
+- `backend/requirements.txt` includes `pandas`; `torch` is optional and only needed when you want the backend to serve legacy `.pt` checkpoints directly. Install it with `backend/.venv/Scripts/python -m pip install -r backend/requirements-legacy.txt`.
 - If `torch` is not installed in the backend venv, the legacy fallback is skipped and the heuristic fallback is used instead.

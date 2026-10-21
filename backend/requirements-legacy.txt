@@ -1,0 +1,5 @@
+# Optional extras for serving Nilm.rar PyTorch checkpoints directly from backend.
+# Install with:
+#   backend/.venv/Scripts/python -m pip install -r requirements-legacy.txt
+
+torch>=2.0
