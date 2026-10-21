@@ -12,11 +12,16 @@ dist/
 ._*
 data/raw/
 data/processed/
+data/csv_demo/
 ml/checkpoints/*.pt
 ml/checkpoints/*.onnx
 !ml/checkpoints/.gitkeep
+ml/legacy_nilm/data/
+ml/legacy_nilm/outputs/
+ml/legacy_nilm/.venv/
 *.h5
 *.hdf5
+*.csv
 .idea/
 .vscode/
 *.db

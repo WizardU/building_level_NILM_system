@@ -1,0 +1,9 @@
+node_modules
+.DS_Store
+*.local
+unpackage
+dist
+.hbuilderx
+.vite
+*.log
+src/components/u-charts

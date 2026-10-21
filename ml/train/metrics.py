@@ -36,14 +36,46 @@ def classification_scores(
     return {"accuracy": float(acc), "precision": float(prec), "recall": float(rec), "f1": float(f1)}
 
 
+def event_scores(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    threshold: float,
+    tol: int = 50,
+) -> dict[str, float]:
+    """Event-level P/R/F1 based on rising edges (ON transitions).
+
+    A predicted event matches a true event if it falls within ±tol samples.
+    This is more application-relevant than per-sample scores.
+    """
+    def rising_edges(signal):
+        on = np.asarray(signal) >= threshold
+        return np.flatnonzero(np.diff(on.astype(np.int8)) == 1) + 1
+
+    true_ev = rising_edges(y_true)
+    pred_ev = rising_edges(y_pred)
+    matched, used = 0, set()
+    for e in pred_ev:
+        if len(true_ev):
+            j = int(np.argmin(np.abs(true_ev - e)))
+            if abs(int(true_ev[j]) - e) <= tol and j not in used:
+                matched += 1
+                used.add(j)
+    p = matched / len(pred_ev) if len(pred_ev) else 0.0
+    r = matched / len(true_ev) if len(true_ev) else 0.0
+    f1 = 2 * p * r / max(p + r, 1e-9)
+    return {"precision": float(p), "recall": float(r), "f1": float(f1)}
+
+
 def evaluate_all(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     on_threshold: float,
+    event_tol: int = 50,
 ) -> dict[str, float]:
     out = {
         "mae": mae(y_true, y_pred),
         "sae": sae(y_true, y_pred),
     }
-    out.update(classification_scores(y_true, y_pred, on_threshold))
+    out.update({f"state_{k}": v for k, v in classification_scores(y_true, y_pred, on_threshold).items()})
+    out.update({f"event_{k}": v for k, v in event_scores(y_true, y_pred, on_threshold, event_tol).items()})
     return out

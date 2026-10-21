@@ -45,17 +45,74 @@ One-command Docker demo (after models exist under `ml/checkpoints/`):
 docker compose up --build
 ```
 
+## Mobile demo
+
+A Uni-app + Vue 3 mobile client lives in `mobile/`. It shares the same FastAPI backend and supports H5 / WeChat mini-program / Android / iOS builds.
+
+One-command mobile demo (backend + H5 dev server):
+
+```powershell
+# Windows PowerShell
+.\scripts\demo_mobile.ps1
+
+# Windows CMD
+scripts\demo_mobile.cmd
+
+# Git Bash / WSL / Linux / macOS
+bash scripts/demo_mobile.sh
+```
+
+Or start it manually:
+
+```bash
+cd mobile
+npm install
+npm run dev:h5
+```
+
+Open the printed URL (default http://localhost:3100) and log in with `admin` / `admin123`. For physical phone preview, update `mobile/utils/config.js` to use your computer's LAN IP.
+
+See [mobile/README.md](mobile/README.md) for details.
+
 ## Layout
 
 | Path | Role |
 |------|------|
 | `openapi/` | OpenAPI contract |
 | `ml/` | Preprocess, Seq2Point train/eval, ONNX export/inference |
+| `ml/legacy_nilm/` | Reference Seq2Point/Seq2Seq implementation (from Nilm.rar) |
 | `backend/` | FastAPI + JWT + disaggregation jobs |
 | `web/` | Vue 3 + Element Plus + ECharts console |
 | `mobile/` | Uni-app basic client (not in demo path) |
 | `adapters/` | Replay simulator + Modbus/MQTT sources |
 | `data/` | Raw / processed datasets |
+
+## Reference NILM implementation
+
+The `ml/legacy_nilm/` directory contains a self-contained reference implementation (originally from `Nilm.rar`) with:
+
+- `Seq2PointCNN` and `Seq2SeqLSTM` models
+- Sliding-window training / disaggregation pipeline
+- Event-level P/R/F1 evaluation
+- CSV-based synthetic data generator
+- Streamlit demo app
+
+Useful parts have been integrated into the main system:
+
+- `Seq2SeqLSTM` is available in `ml/models/seq2seq.py` and selectable via `build_model("seq2seq")`
+- Event-level F1 metrics are added to `ml/train/metrics.py`
+- `ml/preprocess/generate_csv_demo.py` produces UK-DALE-style CSV data
+
+To run the standalone reference demo:
+
+```bash
+cd ml/legacy_nilm
+python -m venv .venv
+.venv\Scripts\pip install -r requirements.txt
+python make_demo_data.py
+python train.py --appliance kettle --model seq2point --epochs 6
+python -m streamlit run app.py
+```
 
 ## Demo script
 

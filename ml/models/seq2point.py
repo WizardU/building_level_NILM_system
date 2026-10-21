@@ -150,6 +150,9 @@ def build_model(name: str, window_size: int = 599) -> nn.Module:
         return Seq2PointDilated(window_size)
     if name in ("attention", "proposed", "seq2point_attention"):
         return Seq2PointAttention(window_size)
+    if name in ("seq2seq", "seq2seq_lstm"):
+        from .seq2seq import Seq2SeqLSTM
+        return Seq2SeqLSTM(window_size)
     raise ValueError(f"Unknown model: {name}")
 
 

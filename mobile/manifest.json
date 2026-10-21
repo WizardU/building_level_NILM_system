@@ -1,8 +1,0 @@
-{
-  "name": "NILM Mobile",
-  "appid": "__UNI__NILM001",
-  "description": "Building-level NILM basic client",
-  "versionName": "1.0.0",
-  "versionCode": "100",
-  "vueVersion": "3"
-}

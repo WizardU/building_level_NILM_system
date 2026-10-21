@@ -2,20 +2,30 @@
   "pages": [
     {
       "path": "pages/login/login",
-      "style": { "navigationBarTitleText": "NILM Login" }
+      "style": { "navigationBarTitleText": "NILM Login", "navigationStyle": "custom" }
     },
     {
       "path": "pages/home/home",
-      "style": { "navigationBarTitleText": "实时功率" }
+      "style": { "navigationBarTitleText": "实时监测" }
     },
     {
       "path": "pages/appliances/appliances",
       "style": { "navigationBarTitleText": "电器分解" }
+    },
+    {
+      "path": "pages/analytics/analytics",
+      "style": { "navigationBarTitleText": "用电分析" }
+    },
+    {
+      "path": "pages/profile/profile",
+      "style": { "navigationBarTitleText": "我的" }
     }
   ],
   "tabBar": {
     "color": "#64748B",
     "selectedColor": "#0D9488",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
     "list": [
       {
         "pagePath": "pages/home/home",
@@ -24,6 +34,14 @@
       {
         "pagePath": "pages/appliances/appliances",
         "text": "电器"
+      },
+      {
+        "pagePath": "pages/analytics/analytics",
+        "text": "分析"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的"
       }
     ]
   },
