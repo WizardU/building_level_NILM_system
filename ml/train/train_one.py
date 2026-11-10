@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import random
 from pathlib import Path
 
 import numpy as np
@@ -19,6 +20,13 @@ from train.metrics import evaluate_all
 CKPT_DIR = ROOT / "ml" / "checkpoints"
 
 
+def seed_everything(seed: int) -> None:
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+
+
 def resolve_file(manifest: dict, appliance: str, split: str) -> Path:
     rel = manifest["files"][appliance][split]
     # stored relative to NILM root
@@ -28,58 +36,87 @@ def resolve_file(manifest: dict, appliance: str, split: str) -> Path:
     return p
 
 
+def _predict(model: torch.nn.Module, loader: DataLoader, device: torch.device, stats: dict):
+    model.eval()
+    preds, trues = [], []
+    with torch.no_grad():
+        for x, y in loader:
+            preds.append(model(x.to(device)).cpu().numpy())
+            trues.append(y.numpy())
+    y_pred = np.concatenate(preds) * stats["y_std"] + stats["y_mean"]
+    y_true = np.concatenate(trues) * stats["y_std"] + stats["y_mean"]
+    return y_true, np.clip(y_pred, 0.0, None)
+
+
 def train(
     appliance: str,
     model_name: str = "baseline",
     epochs: int = 5,
-    batch_size: int = 64,
+    batch_size: int = 128,
     lr: float = 1e-4,
+    seed: int = 42,
     use_weighted_huber: bool = False,
+    device_name: str | None = None,
+    num_workers: int = 0,
 ) -> dict:
-    man = json.loads((PROCESSED_DIR / "dataset_manifest.json").read_text(encoding="utf-8"))
-    train_ds = WindowDataset(resolve_file(man, appliance, "train"))
-    val_ds = WindowDataset(resolve_file(man, appliance, "val"))
-    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=0)
-    val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False)
+    seed_everything(seed)
+    manifest = json.loads((PROCESSED_DIR / "dataset_manifest.json").read_text(encoding="utf-8"))
+    if appliance not in manifest["files"]:
+        raise SystemExit(f"{appliance} missing from dataset manifest")
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    train_ds = WindowDataset(resolve_file(manifest, appliance, "train"))
+    val_ds = WindowDataset(resolve_file(manifest, appliance, "val"))
+    train_loader = DataLoader(
+        train_ds, batch_size=batch_size, shuffle=True, num_workers=num_workers
+    )
+    val_loader = DataLoader(val_ds, batch_size=batch_size * 2, shuffle=False)
+
+    if device_name:
+        device = torch.device(device_name)
+    else:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = build_model(model_name, WINDOW_SIZE).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=lr)
-    criterion = WeightedHuberLoss() if use_weighted_huber else torch.nn.MSELoss()
+    criterion = (
+        WeightedHuberLoss(pos_weight=10.0) if use_weighted_huber else torch.nn.MSELoss()
+    )
 
-    stats = man["stats"][appliance]
+    stats = manifest["stats"][appliance]
+    default_threshold = float(ON_THRESHOLDS[appliance])
     best_val = float("inf")
-    history = []
+    history: list[dict] = []
+    ckpt_path = CKPT_DIR / f"{appliance}_{model_name}.pt"
+    CKPT_DIR.mkdir(parents=True, exist_ok=True)
 
     for epoch in range(1, epochs + 1):
         model.train()
         losses = []
-        for x, y in tqdm(train_loader, desc=f"{appliance}/{model_name} ep{epoch}", leave=False):
+        for x, y in tqdm(
+            train_loader, desc=f"{appliance}/{model_name} ep{epoch}", leave=False
+        ):
             x, y = x.to(device), y.to(device)
             opt.zero_grad()
             pred = model(x)
             loss = criterion(pred, y)
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
             opt.step()
             losses.append(loss.item())
-        model.eval()
-        preds, trues = [], []
-        with torch.no_grad():
-            for x, y in val_loader:
-                x = x.to(device)
-                pred = model(x).cpu().numpy()
-                preds.append(pred)
-                trues.append(y.numpy())
-        y_pred = np.concatenate(preds) * stats["y_std"] + stats["y_mean"]
-        y_true = np.concatenate(trues) * stats["y_std"] + stats["y_mean"]
-        metrics = evaluate_all(y_true, y_pred, ON_THRESHOLDS[appliance])
-        metrics["train_loss"] = float(np.mean(losses))
-        history.append(metrics)
-        print(f"[{appliance}|{model_name}] epoch {epoch}: {metrics}")
+
+        y_true, y_pred = _predict(model, val_loader, device, stats)
+        metrics = evaluate_all(y_true, y_pred, default_threshold)
+        metrics["train_loss"] = float(np.mean(losses)) if losses else float("nan")
+        metrics["epoch"] = epoch
+        history.append({k: float(v) for k, v in metrics.items()})
+        print(
+            f"[{appliance}|{model_name}] epoch {epoch}: "
+            f"loss={metrics['train_loss']:.4f} mae={metrics['mae']:.2f} "
+            f"sae={metrics['sae']:.3f} state_f1={metrics['state_f1']:.3f} "
+            f"event_f1={metrics['event_f1']:.3f}"
+        )
+
         if metrics["mae"] < best_val:
-            best_val = metrics["mae"]
-            CKPT_DIR.mkdir(parents=True, exist_ok=True)
-            path = CKPT_DIR / f"{appliance}_{model_name}.pt"
+            best_val = float(metrics["mae"])
             torch.save(
                 {
                     "model_name": model_name,
@@ -87,22 +124,63 @@ def train(
                     "state_dict": model.state_dict(),
                     "stats": stats,
                     "window_size": WINDOW_SIZE,
-                    "metrics": metrics,
+                    "sample_period_s": manifest.get("sample_period_s", 1),
+                    "dataset": manifest.get("dataset", ""),
+                    "metrics": {k: float(v) for k, v in metrics.items()},
+                    "epoch": epoch,
                 },
-                path,
+                ckpt_path,
             )
-    return {"appliance": appliance, "model": model_name, "history": history, "best_mae": best_val}
+
+    # Threshold calibration on the validation split (fair: never uses test data).
+    from eval.evaluate import calibrate_threshold
+
+    checkpoint = torch.load(ckpt_path, map_location="cpu", weights_only=False)
+    model.load_state_dict(checkpoint["state_dict"])
+    y_true, y_pred = _predict(model, val_loader, device, stats)
+    threshold, calibrated_f1 = calibrate_threshold(y_true, y_pred, default_threshold)
+    checkpoint["on_threshold"] = threshold
+    checkpoint["val_event_f1"] = calibrated_f1
+    torch.save(checkpoint, ckpt_path)
+    print(
+        f"[{appliance}|{model_name}] best val MAE={best_val:.2f}, "
+        f"threshold={threshold:.1f} W (val event F1={calibrated_f1:.3f})"
+    )
+
+    return {
+        "appliance": appliance,
+        "model": model_name,
+        "history": history,
+        "best_mae": best_val,
+        "on_threshold": threshold,
+        "val_event_f1": calibrated_f1,
+        "checkpoint": str(ckpt_path),
+    }
 
 
 def main() -> None:
-    p = argparse.ArgumentParser()
-    p.add_argument("--appliance", required=True)
-    p.add_argument("--model", default="baseline")
-    p.add_argument("--epochs", type=int, default=5)
-    p.add_argument("--batch-size", type=int, default=64)
-    p.add_argument("--weighted-huber", action="store_true")
-    args = p.parse_args()
-    train(args.appliance, args.model, args.epochs, args.batch_size, use_weighted_huber=args.weighted_huber)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--appliance", required=True)
+    parser.add_argument("--model", default="baseline")
+    parser.add_argument("--epochs", type=int, default=5)
+    parser.add_argument("--batch-size", type=int, default=128)
+    parser.add_argument("--lr", type=float, default=1e-4)
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--device", default=None, help="cpu / cuda / cuda:0")
+    parser.add_argument("--num-workers", type=int, default=0)
+    parser.add_argument("--weighted-huber", action="store_true")
+    args = parser.parse_args()
+    train(
+        args.appliance,
+        args.model,
+        args.epochs,
+        args.batch_size,
+        args.lr,
+        args.seed,
+        use_weighted_huber=args.weighted_huber,
+        device_name=args.device,
+        num_workers=args.num_workers,
+    )
 
 
 if __name__ == "__main__":

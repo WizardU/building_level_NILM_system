@@ -4,31 +4,26 @@
       <view class="brand">
         <text class="logo">⚡</text>
         <text class="title">Building NILM</text>
-        <text class="subtitle">智能负荷监测系统</text>
+        <text class="subtitle">Non-Intrusive Load Monitoring</text>
       </view>
 
       <view class="form">
         <view class="input-wrap">
           <text class="input-icon">👤</text>
-          <input v-model="username" class="input" placeholder="用户名" />
+          <input v-model="username" class="input" placeholder="Username" />
         </view>
 
         <view class="input-wrap">
           <text class="input-icon">🔒</text>
-          <input v-model="password" class="input" password placeholder="密码" />
+          <input v-model="password" class="input" password placeholder="Password" />
         </view>
 
-        <button
-          class="btn"
-          :loading="loading"
-          :disabled="loading"
-          @click="onLogin"
-        >
-          {{ loading ? '登录中...' : '登录' }}
+        <button class="btn" :loading="loading" :disabled="loading" @click="onLogin">
+          {{ loading ? 'Signing in...' : 'Sign in' }}
         </button>
       </view>
 
-      <text class="hint">默认账号 admin / admin123</text>
+      <text class="hint">Default account admin / admin123</text>
     </view>
   </view>
 </template>
@@ -44,19 +39,19 @@ const loading = ref(false)
 
 const onLogin = async () => {
   if (!username.value || !password.value) {
-    uni.showToast({ title: '请输入账号和密码', icon: 'none' })
+    uni.showToast({ title: 'Enter username and password', icon: 'none' })
     return
   }
   loading.value = true
   try {
     const data = await login(username.value, password.value)
     setToken(data.access_token)
-    uni.showToast({ title: '登录成功', icon: 'success' })
+    uni.showToast({ title: 'Signed in', icon: 'success' })
     setTimeout(() => {
       uni.switchTab({ url: '/pages/home/home' })
     }, 500)
   } catch (e) {
-    uni.showToast({ title: '登录失败', icon: 'none' })
+    uni.showToast({ title: 'Sign-in failed', icon: 'none' })
   } finally {
     loading.value = false
   }

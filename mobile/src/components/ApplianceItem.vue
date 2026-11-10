@@ -6,7 +6,7 @@
     <view class="info">
       <text class="name">{{ item.name }}</text>
       <text class="meta">
-        {{ item.energyToday }} · 置信度 {{ item.confidence }}%
+        {{ item.energyToday }} · Model F1 {{ item.confidence }}%<text v-if="item.threshold"> · ON at {{ item.threshold }} W</text>
       </text>
     </view>
     <view class="state">
@@ -14,7 +14,7 @@
         {{ item.state ? `${item.power} W` : 'OFF' }}
       </text>
       <view class="badge" :class="item.state ? 'on' : 'off'">
-        <text class="dot" />{{ item.state ? '运行中' : '待机' }}
+        <text class="dot" />{{ item.state ? 'RUNNING' : 'IDLE' }}
       </view>
     </view>
   </view>

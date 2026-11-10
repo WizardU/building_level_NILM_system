@@ -1,0 +1,29 @@
+{
+  "appliance": "washing_machine",
+  "model_name": "baseline",
+  "stats": {
+    "agg_mean": 381.19167577282053,
+    "agg_std": 460.7095024655755,
+    "y_mean": 36.24888543585021,
+    "y_std": 236.2558465698725
+  },
+  "window_size": 599,
+  "sample_period_s": 6,
+  "dataset": "ukdale_house1",
+  "on_threshold": 1220.788674222507,
+  "metrics": {
+    "mae": 14.793036460876465,
+    "sae": 0.3159230053424835,
+    "state_accuracy": 0.978021978021978,
+    "state_precision": 0.6697368421052632,
+    "state_recall": 0.9356617647058824,
+    "state_f1": 0.7806748466257669,
+    "event_precision": 0.8227848101265823,
+    "event_recall": 0.39634146341463417,
+    "event_f1": 0.5349794238683128,
+    "train_loss": 0.09352609577147585,
+    "epoch": 3.0
+  },
+  "onnx": "washing_machine_baseline.onnx",
+  "params": 30704199
+}

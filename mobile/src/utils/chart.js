@@ -1,3 +1,5 @@
+import { applianceLabel } from './labels.js'
+
 export function buildPowerChartData(result) {
   const mains = result?.mains_series || []
   if (!mains.length) return null
@@ -11,7 +13,7 @@ export function buildPowerChartData(result) {
 
   const series = [
     {
-      name: '总功率',
+      name: 'Mains',
       data: mains.map((p) => Math.round((p.power_kw || 0) * 1000)),
       color: '#0284C7',
       type: 'line',
@@ -30,7 +32,7 @@ export function buildPowerChartData(result) {
     )
     if (data.some((v) => v > 0)) {
       series.push({
-        name: a.name,
+        name: applianceLabel(a.type, a.name),
         data,
         color: palette[idx % palette.length],
         type: 'line',

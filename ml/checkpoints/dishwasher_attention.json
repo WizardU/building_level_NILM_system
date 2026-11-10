@@ -2,20 +2,28 @@
   "appliance": "dishwasher",
   "model_name": "attention",
   "stats": {
-    "agg_mean": 176.3984832763672,
-    "agg_std": 263.42578125,
-    "y_mean": 40.18339157104492,
-    "y_std": 185.9371795654297
+    "agg_mean": 381.19167577282053,
+    "agg_std": 460.7095024655755,
+    "y_mean": 18.247860212224854,
+    "y_std": 190.34697279112606
   },
   "window_size": 599,
+  "sample_period_s": 6,
+  "dataset": "ukdale_house1",
+  "on_threshold": 500.0,
   "metrics": {
-    "mae": 12.89867115020752,
-    "sae": 27087210496.0,
-    "accuracy": 1.0,
-    "precision": 0.0,
-    "recall": 0.0,
-    "f1": 0.0,
-    "train_loss": 0.3982798800472233
+    "mae": 10.814749717712402,
+    "sae": 0.23341652750968933,
+    "state_accuracy": 0.9846307538615231,
+    "state_precision": 0.6575342465753424,
+    "state_recall": 0.3902439024390244,
+    "state_f1": 0.489795918367347,
+    "event_precision": 0.30434782608695654,
+    "event_recall": 0.7,
+    "event_f1": 0.42424242424242425,
+    "train_loss": 0.1780545823463533,
+    "epoch": 3.0
   },
-  "onnx": "dishwasher_attention.onnx"
+  "onnx": "dishwasher_attention.onnx",
+  "params": 9836166
 }

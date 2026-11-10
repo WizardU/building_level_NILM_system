@@ -10,43 +10,59 @@
       <view class="container">
         <view class="summary">
           <view class="summary-col">
-            <text class="summary-label">预估总电费</text>
-            <text class="summary-value">¥{{ bill.totalCost?.toFixed(2) || '0.00' }}</text>
+            <text class="summary-label">Estimated Cost</text>
+            <text class="summary-value">¥{{ (bill.totalCost || 0).toFixed(2) }}</text>
           </view>
           <view class="summary-divider" />
           <view class="summary-col">
-            <text class="summary-label">总用电量</text>
-            <text class="summary-value">{{ bill.totalKWh?.toFixed(2) || '0.00' }} kWh</text>
+            <text class="summary-label">Total Energy</text>
+            <text class="summary-value">{{ (bill.totalKWh || 0).toFixed(2) }} kWh</text>
           </view>
         </view>
 
+        <text v-if="windowText" class="window-text">Window: {{ windowText }}</text>
+        <view v-if="bill.estimated" class="notice">
+          <text class="notice-text">
+            No disaggregation result yet. Showing total energy only.
+          </text>
+        </view>
+
         <view class="section">
-          <text class="section-title">分项用电账单</text>
-          <view v-for="(item, idx) in bill.breakdown" :key="item.key" class="bill-row">
+          <text class="section-title">Energy Breakdown</text>
+          <view v-for="(item, idx) in billRows" :key="item.key" class="bill-row">
             <view class="bill-left">
               <text class="bill-name">{{ item.name }}</text>
               <view class="progress">
-                <view class="progress-bar" :style="{ width: `${Math.min(item.ratio, 100)}%`, background: colors[idx % colors.length] }" />
+                <view
+                  class="progress-bar"
+                  :style="{
+                    width: `${Math.min(item.ratio, 100)}%`,
+                    background: colors[idx % colors.length]
+                  }"
+                />
               </view>
             </view>
             <view class="bill-right">
-              <text class="bill-kwh">{{ item.kWh?.toFixed(2) }} kWh</text>
-              <text class="bill-cost">¥{{ item.cost?.toFixed(2) }}</text>
+              <text class="bill-kwh">{{ (item.kWh || 0).toFixed(2) }} kWh</text>
+              <text class="bill-cost">¥{{ (item.cost || 0).toFixed(2) }}</text>
             </view>
+          </view>
+          <view v-if="!billRows.length" class="empty">
+            <text class="empty-text">No data yet</text>
           </view>
         </view>
 
         <view class="section">
           <view class="section-header">
-            <text class="section-title">告警日志</text>
-            <view v-if="store.alertCount > 0" class="badge"
-              ><text>{{ store.alertCount }} 条未处理</text></view
-            >
+            <text class="section-title">Alert Log</text>
+            <view v-if="store.alertCount > 0" class="badge">
+              <text>{{ store.alertCount }} open</text>
+            </view>
           </view>
 
-          <view v-if="!store.alerts.length" class="empty"
-            ><text class="empty-text">暂无告警</text></view
-          >
+          <view v-if="!store.alerts.length" class="empty">
+            <text class="empty-text">No alerts</text>
+          </view>
 
           <view
             v-for="alert in store.alerts"
@@ -56,15 +72,18 @@
           >
             <view class="alert-dot" :class="alert.type" />
             <view class="alert-body">
-              <text class="alert-title">{{ alert.title }}</text>
-              <text class="alert-msg">{{ alert.message }}</text>
+              <text class="alert-title">{{ titleOf(alert) }}</text>
+              <text class="alert-msg">{{ messageOf(alert) }}</text>
               <text class="alert-time">{{ alert.time }}</text>
             </view>
-            <text class="alert-status">{{ alert.status }}</text>
+            <text v-if="!alert.resolved" class="resolve" @click="resolve(alert)">
+              Resolve
+            </text>
+            <text v-else class="alert-status">Resolved</text>
           </view>
         </view>
 
-        <text v-if="lastUpdate" class="last-update">更新于 {{ lastUpdate }}</text>
+        <text v-if="lastUpdate" class="last-update">Updated {{ lastUpdate }}</text>
       </view>
     </scroll-view>
   </view>
@@ -72,7 +91,8 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { getEnergyBill, getAlerts, getOverview } from '../../utils/api.js'
+import { getEnergyBill, getAlerts, getOverview, resolveAlert } from '../../utils/api.js'
+import { alertTitle, alertMessage, applianceLabel } from '../../utils/labels.js'
 import store from '../../utils/store.js'
 
 const refreshing = ref(false)
@@ -80,6 +100,43 @@ const bill = ref({ totalCost: 0, totalKWh: 0, breakdown: [] })
 const lastUpdate = ref('')
 
 const colors = ['#0D9488', '#0284C7', '#F59E0B', '#8B5CF6', '#EC4899', '#10B981']
+
+const titleOf = (alert) => alertTitle(alert)
+const messageOf = (alert) => alertMessage(alert)
+
+const billRows = computed(() => {
+  // The backend returns appliance names in Chinese; the mobile UI is English.
+  const rows = (bill.value.breakdown || []).map((row) => ({
+    ...row,
+    name: applianceLabel(row.key, row.name)
+  }))
+  const unmetered = Number(bill.value.unmeteredKWh || 0)
+  if (unmetered > 0) {
+    rows.push({
+      key: 'unmetered',
+      name: 'Unmetered',
+      kWh: unmetered,
+      cost: unmetered * Number(bill.value.tariff || 0),
+      ratio: bill.value.totalKWh
+        ? Math.round((unmetered / bill.value.totalKWh) * 100)
+        : 0
+    })
+  }
+  return rows
+})
+
+const windowText = computed(() => {
+  const window = bill.value.window
+  if (!window?.start || !window?.end) return ''
+  const start = new Date(window.start)
+  const end = new Date(window.end)
+  const fmt = (d) =>
+    `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(
+      2,
+      '0'
+    )} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+  return `${fmt(start)} ~ ${fmt(end)}`
+})
 
 async function load() {
   try {
@@ -90,7 +147,7 @@ async function load() {
     ])
     bill.value = energy || { totalCost: 0, totalKWh: 0, breakdown: [] }
     store.alerts = alerts?.items || []
-    store.alertCount = store.alerts.filter((a) => a.status === '未处理').length
+    store.alertCount = store.alerts.filter((a) => !a.resolved).length
     store.overview = { ...(store.overview || {}), ...overview }
     const now = new Date()
     lastUpdate.value = `${String(now.getHours()).padStart(2, '0')}:${String(
@@ -98,6 +155,15 @@ async function load() {
     ).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`
   } catch (e) {
     console.error('analytics load error', e)
+  }
+}
+
+async function resolve(alert) {
+  try {
+    await resolveAlert(alert.id)
+    await load()
+  } catch (e) {
+    uni.showToast({ title: 'Failed to resolve', icon: 'none' })
   }
 }
 
@@ -111,7 +177,7 @@ let timer = null
 
 onMounted(async () => {
   await load()
-  timer = setInterval(load, 15000)
+  timer = setInterval(load, 30000)
 })
 
 onUnmounted(() => {
@@ -279,7 +345,13 @@ onUnmounted(() => {
 }
 .alert-status {
   font-size: 22rpx;
-  color: #ef4444;
+  color: #10b981;
+  margin-left: 16rpx;
+  white-space: nowrap;
+}
+.resolve {
+  font-size: 22rpx;
+  color: #0d9488;
   margin-left: 16rpx;
   white-space: nowrap;
 }
@@ -289,5 +361,22 @@ onUnmounted(() => {
   font-size: 22rpx;
   color: #94a3b8;
   padding-bottom: 40rpx;
+}
+.window-text {
+  display: block;
+  font-size: 22rpx;
+  color: #94a3b8;
+  margin: -8rpx 0 16rpx 8rpx;
+}
+.notice {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 12rpx;
+  padding: 16rpx 20rpx;
+  margin-bottom: 20rpx;
+}
+.notice-text {
+  font-size: 22rpx;
+  color: #92400e;
 }
 </style>

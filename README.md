@@ -1,150 +1,157 @@
 # Building-Level NILM System
 
-Non-Intrusive Load Monitoring for buildings: Seq2Point disaggregation, FastAPI backend ([openapi/NILM.json](openapi/NILM.json)), Vue Web console, Uni-app mobile client, and meter adapters (UK-DALE replay + optional Modbus/MQTT).
+Non-Intrusive Load Monitoring for buildings: UK-DALE data pipeline, Seq2Point
+disaggregation, FastAPI backend, Vue 3 Web console and a uni-app mobile client.
 
-## Quick start (Web demo)
+This repository is no longer a mock-only demo: the Web and mobile clients read
+real UK-DALE house 1 data through ONNX Runtime.
+
+## What works today
+
+- **Real dataset**: UK-DALE house 1, 2014-01-01 → 2014-07-01, 2,606,400 samples
+  at 6 s resolution, 5 appliances (fridge, kettle, microwave, dishwasher,
+  washing machine).
+- **Trained models**: Seq2Point attention (9.8 M params) and baseline
+  (30.7 M params), 3 epochs on an RTX 3070, exported to ONNX with numerical
+  parity checks.
+- **Evidence-based metrics**: every number on the Evaluation page comes from
+  `ml/checkpoints/ablation_metrics.json` (13,013 test windows per appliance).
+- **End-to-end API**: login → buildings/meters → measurements → disaggregation
+  → analytics → alerts. `scripts/smoke_api.py` checks all of it.
+- **Web console**: live mains + per-appliance curves, KPI cards, real model
+  metrics, billing/energy breakdown, alert lifecycle.
+- **Mobile client**: fully English UI, builds to H5 (uni-app + Node 22).
+- **Data quality guardrails**: UTC timestamps, cache keys per time window,
+  unique `(meter_id, timestamp)`, alert cooldown, input limits.
+
+## Datasets
+
+| Dataset | Role | Size | License |
+|---------|------|------|---------|
+| [UK-DALE](https://data.ceda.ac.uk/edc/d1/7d78f943-f9fe-413b-af52-1816f9d968b0) | Disaggregation training/evaluation | 5.1 GB zip → 5.9 GB HDF5 | CC BY 4.0 |
+| [WHITED](https://www.cs.cit.tum.de/dis/resources/whited/) | Appliance transient identification (optional) | 225 MB, 994 FLAC files | CC BY 4.0 |
+
+Download both (resumable):
 
 ```bash
-# 1) Generate synthetic training windows + train baseline models (no UK-DALE required)
-cd ml
-python -m venv .venv
-# Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-python -m preprocess.generate_synthetic
-python -m train.train_all --epochs 3
-python -m export.export_onnx
-
-# 2) Backend + DB
-cd ../backend
-pip install -r requirements.txt
-# Optional: docker compose up -d db
-# Or use SQLite (default when DATABASE_URL unset)
-uvicorn app.main:app --reload --port 8000
-
-# 3) Web
-cd ../web
-npm install
-npm run dev
+python scripts/download_datasets.py --dataset all
+python scripts/extract_ukdale.py          # extracts ukdale.h5
 ```
 
-Open http://localhost:3000 — login `admin` / `admin123`.
+Files land in `data/raw/` (git-ignored) with a SHA-256 manifest.
 
-One-command local demo (PowerShell or Bash):
+> WHITED is transient (high-frequency start-up) data, so it is used for
+> appliance identification experiments, not for the 6 s Seq2Point task.
+
+## Quick start (Windows)
 
 ```powershell
-# Windows PowerShell
+# First run only: downloads 5.1 GB, preprocesses, trains, exports ONNX
+.\scripts\demo_web.ps1 -Download
+
+# Later runs
 .\scripts\demo_web.ps1
-
-# Git Bash / WSL / Linux / macOS
-bash scripts/demo_web.sh
 ```
 
-One-command Docker demo (after models exist under `ml/checkpoints/`):
+Then open http://localhost:3000 and sign in with `admin` / `admin123`.
 
-```bash
-docker compose up --build
-```
-
-## Mobile demo
-
-A Uni-app + Vue 3 mobile client lives in `mobile/`. It shares the same FastAPI backend and supports H5 / WeChat mini-program / Android / iOS builds.
-
-One-command mobile demo (backend + H5 dev server):
+Mobile (H5):
 
 ```powershell
-# Windows PowerShell
 .\scripts\demo_mobile.ps1
-
-# Windows CMD
-scripts\demo_mobile.cmd
-
-# Git Bash / WSL / Linux / macOS
-bash scripts/demo_mobile.sh
+# http://127.0.0.1:3100
 ```
 
-Or start it manually:
+### Manual pipeline
 
 ```bash
-cd mobile
-npm install
-npm run dev:h5
+cd ml
+python -m venv .venv && .venv\Scripts\activate
+pip install -r requirements.txt          # includes hdf5plugin (Blosc) and torch
+
+python -m preprocess.ukdale --h5 ..\data\raw\ukdale.h5 --house 1
+python -m train.train_all --models attention baseline --epochs 3 --device cuda
+python -m export.export_onnx --all
+python -m eval.export_thesis_tables
 ```
 
-Open the printed URL (default http://localhost:3100) and log in with `admin` / `admin123`. For physical phone preview, update `mobile/utils/config.js` to use your computer's LAN IP.
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
 
-See [mobile/README.md](mobile/README.md) for details.
+The backend seeds the demo building and preloads one day of real UK-DALE
+samples on first start. `GET /readyz` reports the inference backend
+(`onnx` / `torch-legacy` / `heuristic`).
+
+## Results (UK-DALE house 1, test split)
+
+| Appliance | Attention MAE | SAE | State F1 | Event F1 | Baseline MAE | State F1 |
+|-----------|--------------:|----:|---------:|---------:|-------------:|---------:|
+| fridge | 21.31 W | 0.006 | 0.781 | 0.861 | 20.53 W | 0.784 |
+| kettle | 9.21 W | 0.153 | 0.744 | 0.755 | 8.14 W | 0.821 |
+| microwave | 6.76 W | 0.345 | 0.152 | 0.288 | 7.08 W | 0.329 |
+| dishwasher | 8.72 W | 0.105 | 0.845 | 0.810 | 9.53 W | 0.724 |
+| washing machine | 11.15 W | 0.013 | 0.884 | 0.840 | 13.38 W | 0.952 |
+| **mean** | — | — | **0.681** | **0.711** | — | **0.722** |
+
+Honest reading: attention wins clearly on dishwasher and washing machine
+(especially SAE), but baseline is still better on kettle and microwave, and
+slightly better on mean state F1. The current "proposed vs baseline" story is
+therefore **not yet a win**; see `IMPROVEMENT_PLAN.md` (threshold search,
+positive weighting, longer schedules) and `MIDTERM_STATUS.md`.
 
 ## Layout
 
 | Path | Role |
 |------|------|
-| `openapi/` | OpenAPI contract |
-| `ml/` | Preprocess, Seq2Point train/eval, ONNX export/inference |
-| `ml/legacy_nilm/` | Reference Seq2Point/Seq2Seq implementation (from Nilm.rar) |
-| `backend/` | FastAPI + JWT + disaggregation jobs |
-| `web/` | Vue 3 + Element Plus + ECharts console |
-| `mobile/` | Uni-app basic client (not in demo path) |
-| `adapters/` | Replay simulator + Modbus/MQTT sources |
-| `data/` | Raw / processed datasets |
+| `openapi/` | Original contract (FastAPI `/docs` is now the source of truth) |
+| `ml/` | Preprocess, training, evaluation, ONNX export/inference |
+| `ml/legacy_nilm/` | Archived reference implementation (not on the demo path) |
+| `backend/` | FastAPI + JWT + disaggregation + analytics |
+| `web/` | Vue 3 + Element Plus + ECharts console (bilingual) |
+| `mobile/` | uni-app client (English UI, H5/WeChat/App builds) |
+| `adapters/` | Replay simulator + optional Modbus/MQTT stubs |
+| `data/` | Raw and processed datasets (git-ignored) |
+| `scripts/` | Dataset download, extraction, smoke test, demo launchers |
 
-## Reference NILM implementation
+## API
 
-The `ml/legacy_nilm/` directory contains a self-contained reference implementation (originally from `Nilm.rar`) with:
+Interactive docs: http://127.0.0.1:8000/docs
 
-- `Seq2PointCNN` and `Seq2SeqLSTM` models
-- Sliding-window training / disaggregation pipeline
-- Event-level P/R/F1 evaluation
-- CSV-based synthetic data generator
-- Streamlit demo app
+Key endpoints (all under `/api/v1` unless noted):
 
-Useful parts have been integrated into the main system:
+- `POST /auth/login`
+- `GET /disaggregation/result?meter_id&start&end&refresh`
+- `GET /disaggregation/overview`
+- `GET /disaggregation/models`
+- `GET /analytics/metrics`, `GET /analytics/reports`
+- `GET /analytics/energy`, `GET|PUT /analytics/settings`
+- `GET /analytics/alerts`, `POST /analytics/alerts/{id}/resolve`
+- `GET /readyz` (root, no auth)
 
-- `Seq2SeqLSTM` is available in `ml/models/seq2seq.py` and selectable via `build_model("seq2seq")`
-- Event-level F1 metrics are added to `ml/train/metrics.py`
-- `ml/preprocess/generate_csv_demo.py` produces UK-DALE-style CSV data
+All timestamps are UTC and serialized with a trailing `Z`.
 
-To run the standalone reference demo:
-
-```bash
-cd ml/legacy_nilm
-python -m venv .venv
-.venv\Scripts\pip install -r requirements.txt
-python make_demo_data.py
-python train.py --appliance kettle --model seq2point --epochs 6
-python -m streamlit run app.py
-```
-
-## Demo script
-
-1. Start backend (seeds Building A / Floor 1 / Meter 101).
-2. `python -m adapters.replay.cli --meter-id 101 --speed 20`
-3. Open Dashboard → live mains + appliance stack; Evaluation → metrics; Analytics → energy share.
-
-## Using the Nilm.rar legacy reference inside the demo
-
-The FastAPI backend can fall back to the `ml/legacy_nilm` PyTorch checkpoints when no ONNX models exist. To set this up:
+## Tests and checks
 
 ```bash
-# 1) Train legacy checkpoints
-cd ml/legacy_nilm
-python -m venv .venv
-.venv\Scripts\pip install -r requirements.txt
-python make_demo_data.py
-python train.py --appliance kettle --model seq2point --epochs 6
-python train.py --appliance microwave --model seq2point --epochs 6
-python train.py --appliance washing_machine --model seq2point --epochs 6
-python train.py --appliance fridge --model seq2point --epochs 6
-
-# 2) Import the demo aggregate data into the backend DB
-cd ../..
-backend/.venv/Scripts/python scripts/import_legacy_data.py
-
-# 3) Start backend (it auto-discovers ml/legacy_nilm/outputs/checkpoints/*.pt)
-cd backend
-.venv\Scripts\uvicorn app.main:app --reload --port 8000
+python scripts/smoke_api.py        # 19 end-to-end API checks
+cd web && npm run build            # production build
+cd mobile && npm run build:h5      # H5 build (Node >= 22.12)
 ```
 
-Notes:
+## Known limitations
 
-- `backend/requirements.txt` includes `pandas`; `torch` is optional and only needed when you want the backend to serve legacy `.pt` checkpoints directly. Install it with `backend/.venv/Scripts/python -m pip install -r backend/requirements-legacy.txt`.
-- If `torch` is not installed in the backend venv, the legacy fallback is skipped and the heuristic fallback is used instead.
+- Only one house so far; cross-house generalisation is not measured yet.
+- No automated unit tests/CI; `smoke_api.py` is the current regression net.
+- SQLite + `create_all` (no Alembic migrations yet); Postgres/Timescale is
+  wired in Docker Compose but not exercised.
+- Mobile H5 is verified by build; device-level WeChat/App builds are untested.
+- WHITED is downloaded but not yet wired into a UI experiment.
+
+## Team
+
+- 金欣怡 — data pipeline, backend, Web console
+- 杨一飞 — Seq2Point models, ablations, ONNX
+- 余升斌 — mobile client

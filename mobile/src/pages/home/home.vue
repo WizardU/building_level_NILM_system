@@ -12,18 +12,24 @@
 
         <AlertBanner :power="mainsPower" />
 
+        <view v-if="degraded" class="warn-banner">
+          <text class="warn-text">
+            Inference backend is not ONNX ({{ backendLabel }}). Numbers are for flow demo only.
+          </text>
+        </view>
+
         <view class="kpi-row">
           <KpiCard
-            label="总入户功率"
+            label="Mains Power"
             :value="mainsPower"
             unit="W"
             value-color="#0284C7"
             border-color="#BFDBFE"
           />
           <KpiCard
-            label="激活设备"
+            label="Active Devices"
             :value="`${activeCount} / ${totalCount}`"
-            unit="台"
+            unit="units"
             value-color="#0D9488"
             border-color="#99F6E4"
           />
@@ -31,16 +37,16 @@
 
         <view class="kpi-row">
           <KpiCard
-            label="F1-Score"
+            label="State F1"
             :value="f1Score"
             unit="%"
             value-color="#10B981"
             border-color="#A7F3D0"
           />
           <KpiCard
-            label="MAE"
-            :value="maeScore"
-            unit="W"
+            label="Event F1"
+            :value="eventF1"
+            unit="%"
             value-color="#F59E0B"
             border-color="#FDE68A"
           />
@@ -49,23 +55,17 @@
         <PowerChart :data="chartData" />
 
         <view class="section-header">
-          <text class="section-title">家电运行状态</text>
+          <text class="section-title">Appliance Status</text>
           <button class="refresh-btn" size="mini" :loading="running" @click="runNilm">
-            {{ running ? '分解中' : '刷新分解' }}
+            {{ running ? 'Running...' : 'Refresh' }}
           </button>
         </view>
 
         <view class="appliance-list">
-          <ApplianceItem
-            v-for="item in appliances"
-            :key="item.id"
-            :item="item"
-          />
+          <ApplianceItem v-for="item in appliances" :key="item.id" :item="item" />
         </view>
 
-        <text v-if="lastUpdate" class="last-update"
-          >更新于 {{ lastUpdate }}</text
-        >
+        <text v-if="lastUpdate" class="last-update">Updated {{ lastUpdate }}</text>
       </view>
     </scroll-view>
   </view>
@@ -87,6 +87,7 @@ import {
   getDisaggregationStatus,
   getAlerts
 } from '../../utils/api.js'
+import { applianceLabel, applianceKey } from '../../utils/labels.js'
 import store, {
   setBuildingId,
   setMeterId,
@@ -101,9 +102,9 @@ const running = ref(false)
 const lastUpdate = ref('')
 
 const mainsPower = computed(() => {
-  const fromApps = calculatedMainsPower.value
-  if (fromApps > 0) return Math.round(fromApps)
-  return Math.round(store.overview?.mainsPower || 0)
+  const overviewPower = Number(store.overview?.mainsPower || 0)
+  if (overviewPower > 0) return Math.round(overviewPower)
+  return Math.round(calculatedMainsPower.value)
 })
 const activeCount = computed(
   () => activeDevicesCount.value || store.overview?.activeDevices || 0
@@ -111,16 +112,18 @@ const activeCount = computed(
 const totalCount = computed(
   () => totalDevicesCount.value || store.overview?.totalDevices || 0
 )
-const f1Score = computed(() =>
-  ((store.overview?.f1Score || 0) * 100).toFixed(1)
+const f1Score = computed(() => ((store.overview?.f1Score || 0) * 100).toFixed(1))
+const eventF1 = computed(() => ((store.overview?.eventF1 || 0) * 100).toFixed(1))
+const backendLabel = computed(() => store.overview?.backend || 'unknown')
+const degraded = computed(
+  () => !!store.overview?.backend && store.overview.backend !== 'onnx'
 )
-const maeScore = computed(() => (store.overview?.maeScore || 0).toFixed(1))
 const appliances = computed(() => store.appliances)
 const chartData = computed(() => buildPowerChartData(store.overview?.result))
 
 async function loadMeta() {
-  const b = await listBuildings()
-  store.buildings = b?.items || []
+  const buildings = await listBuildings()
+  store.buildings = buildings?.items || []
   if (!store.buildings.find((x) => x.id === store.buildingId)) {
     const first = store.buildings[0]
     if (first) setBuildingId(first.id)
@@ -129,8 +132,8 @@ async function loadMeta() {
 }
 
 async function loadMeters() {
-  const m = await listMeters(store.buildingId)
-  store.meters = m?.items || []
+  const meters = await listMeters(store.buildingId)
+  store.meters = meters?.items || []
   if (!store.meters.find((x) => x.id === store.meterId)) {
     const first = store.meters[0]
     if (first) setMeterId(first.id)
@@ -144,13 +147,10 @@ async function loadDashboard() {
       getResult(store.meterId),
       getAlerts(store.buildingId)
     ])
-    store.overview = {
-      ...overview,
-      result
-    }
+    store.overview = { ...overview, result }
     store.appliances = normalizeAppliances(result?.appliances || [])
     store.alerts = alerts?.items || []
-    store.alertCount = store.alerts.filter((a) => a.status === '未处理').length
+    store.alertCount = store.alerts.filter((a) => !a.resolved).length
     const now = new Date()
     lastUpdate.value = `${String(now.getHours()).padStart(2, '0')}:${String(
       now.getMinutes()
@@ -163,13 +163,15 @@ async function loadDashboard() {
 function normalizeAppliances(apps) {
   return apps.map((a) => ({
     id: a.appliance_id || a.type,
-    key: a.type === 'washing_machine' ? 'washingMachine' : a.type,
-    name: a.name,
+    key: applianceKey(a.type),
+    type: a.type,
+    name: applianceLabel(a.type, a.name),
     power: Math.round(a.power_w || 0),
     state: !!a.state,
-    confidence: Math.round((a.confidence || 0.9) * 1000) / 10,
-    energyToday: `${(a.energy_kwh || 0).toFixed(2)} kWh`,
-    percentage: a.percentage || 0
+    confidence: Math.round((a.confidence || 0) * 1000) / 10,
+    energyToday: `${(a.energy_kwh || 0).toFixed(3)} kWh`,
+    percentage: a.percentage || 0,
+    threshold: a.threshold_w
   }))
 }
 
@@ -201,9 +203,9 @@ async function runNilm() {
     const { task_id: taskId } = await runDisaggregation(store.meterId)
     await pollTask(taskId)
     await loadDashboard()
-    uni.showToast({ title: '分解完成', icon: 'success' })
+    uni.showToast({ title: 'Disaggregation complete', icon: 'success' })
   } catch (e) {
-    uni.showToast({ title: '分解失败', icon: 'none' })
+    uni.showToast({ title: 'Disaggregation failed', icon: 'none' })
   } finally {
     running.value = false
   }
@@ -236,7 +238,7 @@ let timer = null
 
 onMounted(async () => {
   await refreshAll()
-  timer = setInterval(loadDashboard, 15000)
+  timer = setInterval(loadDashboard, 30000)
 })
 
 onUnmounted(() => {
@@ -292,5 +294,17 @@ onUnmounted(() => {
   font-size: 22rpx;
   color: #94a3b8;
   padding-bottom: 40rpx;
+}
+.warn-banner {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 12rpx;
+  padding: 16rpx 20rpx;
+  margin-bottom: 16rpx;
+}
+.warn-text {
+  font-size: 22rpx;
+  color: #92400e;
+  line-height: 1.4;
 }
 </style>

@@ -1,0 +1,492 @@
+[
+  {
+    "appliance": "fridge",
+    "model": "attention",
+    "history": [
+      {
+        "mae": 22.948589324951172,
+        "sae": 0.16404075920581818,
+        "state_accuracy": 0.8302466764005225,
+        "state_precision": 0.8979831144465291,
+        "state_recall": 0.6833839014813493,
+        "state_f1": 0.7761224282963415,
+        "event_precision": 0.7432578209277239,
+        "event_recall": 0.9690576652601969,
+        "event_f1": 0.8412698412698412,
+        "train_loss": 2.5870638347926893,
+        "epoch": 1.0
+      },
+      {
+        "mae": 24.293922424316406,
+        "sae": 0.1618805080652237,
+        "state_accuracy": 0.8610620149081688,
+        "state_precision": 0.8217737832796337,
+        "state_recall": 0.8648938068891665,
+        "state_f1": 0.8427826086956521,
+        "event_precision": 0.7293625914315569,
+        "event_recall": 0.9817158931082982,
+        "event_f1": 0.8369304556354916,
+        "train_loss": 2.1460631528653598,
+        "epoch": 2.0
+      },
+      {
+        "mae": 22.913089752197266,
+        "sae": 0.037233661860227585,
+        "state_accuracy": 0.8596019365250135,
+        "state_precision": 0.8677444487728866,
+        "state_recall": 0.795109762627164,
+        "state_f1": 0.8298407376362112,
+        "event_precision": 0.7153061224489796,
+        "event_recall": 0.9859353023909986,
+        "event_f1": 0.8290952099349497,
+        "train_loss": 2.038582655756097,
+        "epoch": 3.0
+      }
+    ],
+    "best_mae": 22.913089752197266,
+    "on_threshold": 63.40820473891038,
+    "val_event_f1": 0.8468691878487292,
+    "checkpoint": "C:\\Users\\Wizard\\Desktop\\ComputerScience\\\u6bd5\u4e1a\u8bbe\u8ba1\\NILM\\ml\\checkpoints\\fridge_attention.pt"
+  },
+  {
+    "appliance": "kettle",
+    "model": "attention",
+    "history": [
+      {
+        "mae": 9.169588088989258,
+        "sae": 0.1326805204153061,
+        "state_accuracy": 0.9969261507723046,
+        "state_precision": 0.6067415730337079,
+        "state_recall": 0.9152542372881356,
+        "state_f1": 0.7297297297297298,
+        "event_precision": 0.6162790697674418,
+        "event_recall": 0.9636363636363636,
+        "event_f1": 0.75177304964539,
+        "train_loss": 0.37283106474965616,
+        "epoch": 1.0
+      },
+      {
+        "mae": 9.272599220275879,
+        "sae": 0.3008589744567871,
+        "state_accuracy": 0.9963113809267655,
+        "state_precision": 0.5544554455445545,
+        "state_recall": 0.9491525423728814,
+        "state_f1": 0.7,
+        "event_precision": 0.5625,
+        "event_recall": 0.9818181818181818,
+        "event_f1": 0.7152317880794701,
+        "train_loss": 0.2843821571625181,
+        "epoch": 2.0
+      },
+      {
+        "mae": 9.525636672973633,
+        "sae": 0.1825658679008484,
+        "state_accuracy": 0.995619764850534,
+        "state_precision": 0.5094339622641509,
+        "state_recall": 0.9152542372881356,
+        "state_f1": 0.6545454545454547,
+        "event_precision": 0.5306122448979592,
+        "event_recall": 0.9454545454545454,
+        "event_f1": 0.6797385620915033,
+        "train_loss": 0.2572007157760795,
+        "epoch": 3.0
+      }
+    ],
+    "best_mae": 9.169588088989258,
+    "on_threshold": 500.0,
+    "val_event_f1": 0.75177304964539,
+    "checkpoint": "C:\\Users\\Wizard\\Desktop\\ComputerScience\\\u6bd5\u4e1a\u8bbe\u8ba1\\NILM\\ml\\checkpoints\\kettle_attention.pt"
+  },
+  {
+    "appliance": "microwave",
+    "model": "attention",
+    "history": [
+      {
+        "mae": 8.881448745727539,
+        "sae": 0.6048493385314941,
+        "state_accuracy": 0.994005994005994,
+        "state_precision": 0.12903225806451613,
+        "state_recall": 0.07272727272727272,
+        "state_f1": 0.09302325581395349,
+        "event_precision": 0.2,
+        "event_recall": 0.16216216216216217,
+        "event_f1": 0.1791044776119403,
+        "train_loss": 0.599920563716809,
+        "epoch": 1.0
+      },
+      {
+        "mae": 11.20670223236084,
+        "sae": 0.17829236388206482,
+        "state_accuracy": 0.9928533005456083,
+        "state_precision": 0.27380952380952384,
+        "state_recall": 0.41818181818181815,
+        "state_f1": 0.3309352517985612,
+        "event_precision": 0.32894736842105265,
+        "event_recall": 0.6756756756756757,
+        "event_f1": 0.4424778761061947,
+        "train_loss": 0.5561397421994786,
+        "epoch": 2.0
+      },
+      {
+        "mae": 11.084297180175781,
+        "sae": 0.24196146428585052,
+        "state_accuracy": 0.9914700683931453,
+        "state_precision": 0.24074074074074073,
+        "state_recall": 0.4727272727272727,
+        "state_f1": 0.31901840490797545,
+        "event_precision": 0.29591836734693877,
+        "event_recall": 0.7837837837837838,
+        "event_f1": 0.42962962962962964,
+        "train_loss": 0.47352473075624163,
+        "epoch": 3.0
+      }
+    ],
+    "best_mae": 8.881448745727539,
+    "on_threshold": 132.90309254572938,
+    "val_event_f1": 0.4423076923076923,
+    "checkpoint": "C:\\Users\\Wizard\\Desktop\\ComputerScience\\\u6bd5\u4e1a\u8bbe\u8ba1\\NILM\\ml\\checkpoints\\microwave_attention.pt"
+  },
+  {
+    "appliance": "dishwasher",
+    "model": "attention",
+    "history": [
+      {
+        "mae": 16.400068283081055,
+        "sae": 0.5636956691741943,
+        "state_accuracy": 0.9737185891032045,
+        "state_precision": 0.4012345679012346,
+        "state_recall": 0.7926829268292683,
+        "state_f1": 0.5327868852459017,
+        "event_precision": 0.11304347826086956,
+        "event_recall": 0.65,
+        "event_f1": 0.19259259259259257,
+        "train_loss": 0.3104112302931026,
+        "epoch": 1.0
+      },
+      {
+        "mae": 11.634812355041504,
+        "sae": 0.04004213958978653,
+        "state_accuracy": 0.9846307538615231,
+        "state_precision": 0.6036036036036037,
+        "state_recall": 0.5447154471544715,
+        "state_f1": 0.5726495726495726,
+        "event_precision": 0.2459016393442623,
+        "event_recall": 0.75,
+        "event_f1": 0.3703703703703703,
+        "train_loss": 0.20952523259421516,
+        "epoch": 2.0
+      },
+      {
+        "mae": 10.814749717712402,
+        "sae": 0.23341652750968933,
+        "state_accuracy": 0.9846307538615231,
+        "state_precision": 0.6575342465753424,
+        "state_recall": 0.3902439024390244,
+        "state_f1": 0.489795918367347,
+        "event_precision": 0.30434782608695654,
+        "event_recall": 0.7,
+        "event_f1": 0.42424242424242425,
+        "train_loss": 0.1780545823463533,
+        "epoch": 3.0
+      }
+    ],
+    "best_mae": 10.814749717712402,
+    "on_threshold": 500.0,
+    "val_event_f1": 0.7647058823529411,
+    "checkpoint": "C:\\Users\\Wizard\\Desktop\\ComputerScience\\\u6bd5\u4e1a\u8bbe\u8ba1\\NILM\\ml\\checkpoints\\dishwasher_attention.pt"
+  },
+  {
+    "appliance": "washing_machine",
+    "model": "attention",
+    "history": [
+      {
+        "mae": 20.464014053344727,
+        "sae": 0.005919798277318478,
+        "state_accuracy": 0.9757934373318988,
+        "state_precision": 0.6671532846715329,
+        "state_recall": 0.8400735294117647,
+        "state_f1": 0.7436940602115542,
+        "event_precision": 0.675,
+        "event_recall": 0.32926829268292684,
+        "event_f1": 0.4426229508196721,
+        "train_loss": 0.7158485164454109,
+        "epoch": 1.0
+      },
+      {
+        "mae": 14.150313377380371,
+        "sae": 0.0985923558473587,
+        "state_accuracy": 0.979635748866518,
+        "state_precision": 0.723916532905297,
+        "state_recall": 0.8290441176470589,
+        "state_f1": 0.7729220222793488,
+        "event_precision": 0.6972477064220184,
+        "event_recall": 0.4634146341463415,
+        "event_f1": 0.5567765567765568,
+        "train_loss": 0.4147828849522691,
+        "epoch": 2.0
+      },
+      {
+        "mae": 13.462645530700684,
+        "sae": 0.030560949817299843,
+        "state_accuracy": 0.9785599016368247,
+        "state_precision": 0.6827586206896552,
+        "state_recall": 0.9099264705882353,
+        "state_f1": 0.7801418439716312,
+        "event_precision": 0.6915887850467289,
+        "event_recall": 0.45121951219512196,
+        "event_f1": 0.5461254612546126,
+        "train_loss": 0.3600352996313258,
+        "epoch": 3.0
+      }
+    ],
+    "best_mae": 13.462645530700684,
+    "on_threshold": 500.0,
+    "val_event_f1": 0.8141592920353982,
+    "checkpoint": "C:\\Users\\Wizard\\Desktop\\ComputerScience\\\u6bd5\u4e1a\u8bbe\u8ba1\\NILM\\ml\\checkpoints\\washing_machine_attention.pt"
+  },
+  {
+    "appliance": "fridge",
+    "model": "baseline",
+    "history": [
+      {
+        "mae": 23.121187210083008,
+        "sae": 0.03389951214194298,
+        "state_accuracy": 0.8505340813033121,
+        "state_precision": 0.858346394984326,
+        "state_recall": 0.7819025522041764,
+        "state_f1": 0.8183431400018679,
+        "event_precision": 0.7524219590958019,
+        "event_recall": 0.9831223628691983,
+        "event_f1": 0.8524390243902438,
+        "train_loss": 0.7496701432529249,
+        "epoch": 1.0
+      },
+      {
+        "mae": 21.967470169067383,
+        "sae": 0.027828505262732506,
+        "state_accuracy": 0.8540690079151617,
+        "state_precision": 0.8648542159180457,
+        "state_recall": 0.7835088345529181,
+        "state_f1": 0.8221743608952149,
+        "event_precision": 0.7253886010362695,
+        "event_recall": 0.9845288326300985,
+        "event_f1": 0.8353221957040573,
+        "train_loss": 0.6087020729717455,
+        "epoch": 2.0
+      },
+      {
+        "mae": 20.84943389892578,
+        "sae": 0.06439187377691269,
+        "state_accuracy": 0.8600630139091677,
+        "state_precision": 0.8798714343109683,
+        "state_recall": 0.7817240763876495,
+        "state_f1": 0.8278990643606465,
+        "event_precision": 0.7259565667011375,
+        "event_recall": 0.9873417721518988,
+        "event_f1": 0.8367103694874851,
+        "train_loss": 0.5747846929650557,
+        "epoch": 3.0
+      }
+    ],
+    "best_mae": 20.84943389892578,
+    "on_threshold": 60.90143114530123,
+    "val_event_f1": 0.8493490390576565,
+    "checkpoint": "C:\\Users\\Wizard\\Desktop\\ComputerScience\\\u6bd5\u4e1a\u8bbe\u8ba1\\NILM\\ml\\checkpoints\\fridge_baseline.pt"
+  },
+  {
+    "appliance": "kettle",
+    "model": "baseline",
+    "history": [
+      {
+        "mae": 13.935202598571777,
+        "sae": 0.4504307508468628,
+        "state_accuracy": 0.996003996003996,
+        "state_precision": 0.5360824742268041,
+        "state_recall": 0.8813559322033898,
+        "state_f1": 0.6666666666666666,
+        "event_precision": 0.5319148936170213,
+        "event_recall": 0.9090909090909091,
+        "event_f1": 0.6711409395973154,
+        "train_loss": 0.5846328010700496,
+        "epoch": 1.0
+      },
+      {
+        "mae": 10.855255126953125,
+        "sae": 0.18094399571418762,
+        "state_accuracy": 0.998001998001998,
+        "state_precision": 0.72,
+        "state_recall": 0.9152542372881356,
+        "state_f1": 0.8059701492537312,
+        "event_precision": 0.7123287671232876,
+        "event_recall": 0.9454545454545454,
+        "event_f1": 0.8124999999999999,
+        "train_loss": 0.36726223851407047,
+        "epoch": 2.0
+      },
+      {
+        "mae": 7.731617450714111,
+        "sae": 0.017627205699682236,
+        "state_accuracy": 0.9985399216168447,
+        "state_precision": 0.803030303030303,
+        "state_recall": 0.8983050847457628,
+        "state_f1": 0.8480000000000001,
+        "event_precision": 0.796875,
+        "event_recall": 0.9272727272727272,
+        "event_f1": 0.8571428571428571,
+        "train_loss": 0.2905791853745713,
+        "epoch": 3.0
+      }
+    ],
+    "best_mae": 7.731617450714111,
+    "on_threshold": 668.1984134615395,
+    "val_event_f1": 0.8947368421052632,
+    "checkpoint": "C:\\Users\\Wizard\\Desktop\\ComputerScience\\\u6bd5\u4e1a\u8bbe\u8ba1\\NILM\\ml\\checkpoints\\kettle_baseline.pt"
+  },
+  {
+    "appliance": "microwave",
+    "model": "baseline",
+    "history": [
+      {
+        "mae": 17.232807159423828,
+        "sae": 0.8455610275268555,
+        "state_accuracy": 0.9950818412356874,
+        "state_precision": 0.23529411764705882,
+        "state_recall": 0.07272727272727272,
+        "state_f1": 0.11111111111111113,
+        "event_precision": 0.47058823529411764,
+        "event_recall": 0.21621621621621623,
+        "event_f1": 0.29629629629629634,
+        "train_loss": 0.955112927829859,
+        "epoch": 1.0
+      },
+      {
+        "mae": 13.61242961883545,
+        "sae": 0.40233027935028076,
+        "state_accuracy": 0.9910858372396834,
+        "state_precision": 0.23008849557522124,
+        "state_recall": 0.4727272727272727,
+        "state_f1": 0.30952380952380953,
+        "event_precision": 0.26666666666666666,
+        "event_recall": 0.7567567567567568,
+        "event_f1": 0.3943661971830986,
+        "train_loss": 0.8724883584795814,
+        "epoch": 2.0
+      },
+      {
+        "mae": 9.281174659729004,
+        "sae": 0.41063374280929565,
+        "state_accuracy": 0.9955429186198417,
+        "state_precision": 0.4634146341463415,
+        "state_recall": 0.34545454545454546,
+        "state_f1": 0.39583333333333337,
+        "event_precision": 0.48717948717948717,
+        "event_recall": 0.5135135135135135,
+        "event_f1": 0.5,
+        "train_loss": 0.8093900055286327,
+        "epoch": 3.0
+      }
+    ],
+    "best_mae": 9.281174659729004,
+    "on_threshold": 216.1089648437474,
+    "val_event_f1": 0.5142857142857143,
+    "checkpoint": "C:\\Users\\Wizard\\Desktop\\ComputerScience\\\u6bd5\u4e1a\u8bbe\u8ba1\\NILM\\ml\\checkpoints\\microwave_baseline.pt"
+  },
+  {
+    "appliance": "dishwasher",
+    "model": "baseline",
+    "history": [
+      {
+        "mae": 11.23060131072998,
+        "sae": 0.04736838489770889,
+        "state_accuracy": 0.9822485207100592,
+        "state_precision": 0.5555555555555556,
+        "state_recall": 0.3048780487804878,
+        "state_f1": 0.39370078740157477,
+        "event_precision": 0.32432432432432434,
+        "event_recall": 0.6,
+        "event_f1": 0.4210526315789474,
+        "train_loss": 0.4100304458932461,
+        "epoch": 1.0
+      },
+      {
+        "mae": 13.440790176391602,
+        "sae": 0.02769024297595024,
+        "state_accuracy": 0.9829401367862907,
+        "state_precision": 0.5869565217391305,
+        "state_recall": 0.32926829268292684,
+        "state_f1": 0.421875,
+        "event_precision": 0.4166666666666667,
+        "event_recall": 0.75,
+        "event_f1": 0.5357142857142857,
+        "train_loss": 0.22656267746547729,
+        "epoch": 2.0
+      },
+      {
+        "mae": 14.170519828796387,
+        "sae": 0.08228804171085358,
+        "state_accuracy": 0.9841696764773687,
+        "state_precision": 0.6694915254237288,
+        "state_recall": 0.32113821138211385,
+        "state_f1": 0.4340659340659341,
+        "event_precision": 0.4838709677419355,
+        "event_recall": 0.75,
+        "event_f1": 0.5882352941176471,
+        "train_loss": 0.16989415902007174,
+        "epoch": 3.0
+      }
+    ],
+    "best_mae": 11.23060131072998,
+    "on_threshold": 1874.9358407827547,
+    "val_event_f1": 0.7586206896551724,
+    "checkpoint": "C:\\Users\\Wizard\\Desktop\\ComputerScience\\\u6bd5\u4e1a\u8bbe\u8ba1\\NILM\\ml\\checkpoints\\dishwasher_baseline.pt"
+  },
+  {
+    "appliance": "washing_machine",
+    "model": "baseline",
+    "history": [
+      {
+        "mae": 17.90522003173828,
+        "sae": 0.1146342009305954,
+        "state_accuracy": 0.9671098132636594,
+        "state_precision": 0.5725,
+        "state_recall": 0.8419117647058824,
+        "state_f1": 0.681547619047619,
+        "event_precision": 0.46938775510204084,
+        "event_recall": 0.2804878048780488,
+        "event_f1": 0.3511450381679389,
+        "train_loss": 0.3343843276720298,
+        "epoch": 1.0
+      },
+      {
+        "mae": 16.720718383789062,
+        "sae": 0.07694730907678604,
+        "state_accuracy": 0.9770998232536694,
+        "state_precision": 0.7286245353159851,
+        "state_recall": 0.7205882352941176,
+        "state_f1": 0.7245841035120149,
+        "event_precision": 0.6620689655172414,
+        "event_recall": 0.5853658536585366,
+        "event_f1": 0.6213592233009708,
+        "train_loss": 0.12636225008454763,
+        "epoch": 2.0
+      },
+      {
+        "mae": 14.793036460876465,
+        "sae": 0.3159230053424835,
+        "state_accuracy": 0.978021978021978,
+        "state_precision": 0.6697368421052632,
+        "state_recall": 0.9356617647058824,
+        "state_f1": 0.7806748466257669,
+        "event_precision": 0.8227848101265823,
+        "event_recall": 0.39634146341463417,
+        "event_f1": 0.5349794238683128,
+        "train_loss": 0.09352609577147585,
+        "epoch": 3.0
+      }
+    ],
+    "best_mae": 14.793036460876465,
+    "on_threshold": 1220.788674222507,
+    "val_event_f1": 0.9158878504672897,
+    "checkpoint": "C:\\Users\\Wizard\\Desktop\\ComputerScience\\\u6bd5\u4e1a\u8bbe\u8ba1\\NILM\\ml\\checkpoints\\washing_machine_baseline.pt"
+  }
+]

@@ -6,19 +6,19 @@
     },
     {
       "path": "pages/home/home",
-      "style": { "navigationBarTitleText": "实时监测" }
+      "style": { "navigationBarTitleText": "Live Monitor" }
     },
     {
       "path": "pages/appliances/appliances",
-      "style": { "navigationBarTitleText": "电器分解" }
+      "style": { "navigationBarTitleText": "Appliances" }
     },
     {
       "path": "pages/analytics/analytics",
-      "style": { "navigationBarTitleText": "用电分析" }
+      "style": { "navigationBarTitleText": "Analytics" }
     },
     {
       "path": "pages/profile/profile",
-      "style": { "navigationBarTitleText": "我的" }
+      "style": { "navigationBarTitleText": "Profile" }
     }
   ],
   "tabBar": {
@@ -29,19 +29,19 @@
     "list": [
       {
         "pagePath": "pages/home/home",
-        "text": "监测"
+        "text": "Monitor"
       },
       {
         "pagePath": "pages/appliances/appliances",
-        "text": "电器"
+        "text": "Devices"
       },
       {
         "pagePath": "pages/analytics/analytics",
-        "text": "分析"
+        "text": "Analytics"
       },
       {
         "pagePath": "pages/profile/profile",
-        "text": "我的"
+        "text": "Profile"
       }
     ]
   },

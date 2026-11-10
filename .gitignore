@@ -8,6 +8,8 @@ venv/
 .mypy_cache/
 node_modules/
 dist/
+.tools/
+.tmp/
 .DS_Store
 ._*
 data/raw/

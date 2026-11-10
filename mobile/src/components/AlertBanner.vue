@@ -14,8 +14,9 @@ const props = defineProps({
 })
 
 const visible = computed(() => props.power > store.powerLimit)
-const message = computed(() =>
-  `实时总功率 ${Math.round(props.power)} W，超过安全阈值 ${store.powerLimit} W`
+const message = computed(
+  () =>
+    `Live power ${Math.round(props.power)} W exceeds the ${store.powerLimit} W limit`
 )
 </script>
 

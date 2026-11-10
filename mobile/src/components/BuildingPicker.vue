@@ -2,15 +2,15 @@
   <view class="picker-bar">
     <picker mode="selector" :range="buildingNames" :value="buildingIndex" @change="onBuildingChange">
       <view class="picker-item">
-        <text class="picker-label">建筑</text>
-        <text class="picker-value">{{ selectedBuilding?.name || '请选择' }}</text>
+        <text class="picker-label">Building</text>
+        <text class="picker-value">{{ selectedBuilding?.name || 'Select' }}</text>
         <text class="arrow">▾</text>
       </view>
     </picker>
     <picker mode="selector" :range="meterNames" :value="meterIndex" @change="onMeterChange">
       <view class="picker-item">
-        <text class="picker-label">电表</text>
-        <text class="picker-value">{{ selectedMeter?.name || '请选择' }}</text>
+        <text class="picker-label">Meter</text>
+        <text class="picker-value">{{ selectedMeter?.name || 'Select' }}</text>
         <text class="arrow">▾</text>
       </view>
     </picker>

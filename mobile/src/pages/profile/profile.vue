@@ -7,13 +7,8 @@
     </view>
 
     <view class="section">
-      <view class="cell" @click="toggleLanguage">
-        <text class="cell-label">语言</text>
-        <text class="cell-value">{{ store.language === 'zh' ? '中文' : 'English' }}</text>
-        <text class="arrow">▸</text>
-      </view>
       <view class="cell" @click="editThreshold">
-        <text class="cell-label">功率预警阈值</text>
+        <text class="cell-label">Power Alert Threshold</text>
         <text class="cell-value">{{ store.powerLimit }} W</text>
         <text class="arrow">▸</text>
       </view>
@@ -21,18 +16,19 @@
 
     <view class="section">
       <view class="cell" @click="showAbout">
-        <text class="cell-label">关于 NILM Mobile</text>
+        <text class="cell-label">About NILM Mobile</text>
         <text class="arrow">▸</text>
       </view>
     </view>
 
-    <button class="logout" @click="onLogout">退出登录</button>
+    <button class="logout" @click="onLogout">Sign Out</button>
   </view>
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import store, { clearToken, setLanguage } from '../../utils/store.js'
+import { computed, onMounted } from 'vue'
+import store, { clearToken } from '../../utils/store.js'
+import { getSettings, updateSettings } from '../../utils/api.js'
 
 const username = computed(() => {
   try {
@@ -45,26 +41,34 @@ const username = computed(() => {
   }
 })
 
-const roleText = '系统管理员'
+const roleText = 'System Administrator'
 
-function toggleLanguage() {
-  const next = store.language === 'zh' ? 'en' : 'zh'
-  setLanguage(next)
-  uni.showToast({ title: next === 'zh' ? '已切换中文' : 'Switched to English', icon: 'none' })
+async function loadSettings() {
+  try {
+    const settings = await getSettings()
+    if (settings?.power_limit_w) {
+      store.powerLimit = Number(settings.power_limit_w)
+    }
+  } catch (e) {
+    // keep the local value when offline
+  }
 }
 
 function editThreshold() {
   uni.showModal({
-    title: '设置功率预警阈值',
+    title: 'Power Alert Threshold',
     editable: true,
-    placeholderText: '请输入瓦数',
-    success: (res) => {
-      if (res.confirm) {
-        const val = parseInt(res.content, 10)
-        if (!isNaN(val) && val > 0) {
-          store.powerLimit = val
-          uni.showToast({ title: '设置成功', icon: 'success' })
-        }
+    placeholderText: 'Enter watts',
+    success: async (res) => {
+      if (!res.confirm) return
+      const val = parseInt(res.content, 10)
+      if (isNaN(val) || val <= 0) return
+      try {
+        await updateSettings({ power_limit_w: val })
+        store.powerLimit = val
+        uni.showToast({ title: 'Saved', icon: 'success' })
+      } catch (e) {
+        uni.showToast({ title: 'Save failed', icon: 'none' })
       }
     }
   })
@@ -72,16 +76,16 @@ function editThreshold() {
 
 function showAbout() {
   uni.showModal({
-    title: '关于',
-    content: 'NILM Mobile v1.0.0\n建筑级非侵入式负荷监测移动端 Demo',
+    title: 'About',
+    content: 'NILM Mobile v1.0.0\nBuilding-level non-intrusive load monitoring',
     showCancel: false
   })
 }
 
 function onLogout() {
   uni.showModal({
-    title: '确认退出',
-    content: '退出后需要重新登录',
+    title: 'Sign out?',
+    content: 'You will need to sign in again.',
     success: (res) => {
       if (res.confirm) {
         clearToken()
@@ -90,6 +94,8 @@ function onLogout() {
     }
   })
 }
+
+onMounted(loadSettings)
 </script>
 
 <style>

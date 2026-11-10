@@ -23,10 +23,13 @@ def main() -> None:
     p.add_argument("--speed", type=float, default=10.0, help="samples per second")
     p.add_argument("--username", default="admin")
     p.add_argument("--password", default="admin123")
+    default_npz = ROOT / "data" / "processed" / "replay" / "ukdale_house1_day1.npz"
+    if not default_npz.exists():
+        default_npz = ROOT / "data" / "processed" / "replay" / "synth_house1_day1.npz"
     p.add_argument(
         "--npz",
         type=Path,
-        default=ROOT / "data" / "processed" / "replay" / "synth_house1_day1.npz",
+        default=default_npz,
     )
     p.add_argument("--batch", type=int, default=5)
     args = p.parse_args()

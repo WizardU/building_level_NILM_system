@@ -20,8 +20,8 @@
 
       <h4 class="section-title" style="margin-top: 24px;">{{ $t('team.sysTitle') }}</h4>
       <el-descriptions :column="1" border size="small">
-        <el-descriptions-item :label="$t('team.slidingWindow')">599 Points</el-descriptions-item>
-        <el-descriptions-item :label="$t('team.inferenceEngine')">ONNX Runtime (PyTorch)</el-descriptions-item>
+        <el-descriptions-item :label="$t('team.slidingWindow')">599 points</el-descriptions-item>
+        <el-descriptions-item :label="$t('team.inferenceEngine')">ONNX Runtime (PyTorch → ONNX)</el-descriptions-item>
         <el-descriptions-item :label="$t('team.techStack')">Vue 3 + Element Plus + ECharts</el-descriptions-item>
       </el-descriptions>
     </div>

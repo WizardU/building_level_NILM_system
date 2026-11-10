@@ -70,7 +70,7 @@ def evaluate_all(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     on_threshold: float,
-    event_tol: int = 50,
+    event_tol: int = 10,
 ) -> dict[str, float]:
     out = {
         "mae": mae(y_true, y_pred),

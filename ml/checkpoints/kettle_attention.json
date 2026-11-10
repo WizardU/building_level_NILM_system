@@ -2,20 +2,28 @@
   "appliance": "kettle",
   "model_name": "attention",
   "stats": {
-    "agg_mean": 176.3984832763672,
-    "agg_std": 263.42578125,
-    "y_mean": 13.392659187316895,
-    "y_std": 154.6917724609375
+    "agg_mean": 381.19167577282053,
+    "agg_std": 460.7095024655755,
+    "y_mean": 14.798891739016048,
+    "y_std": 179.10162221494602
   },
   "window_size": 599,
+  "sample_period_s": 6,
+  "dataset": "ukdale_house1",
+  "on_threshold": 500.0,
   "metrics": {
-    "mae": 5.154082775115967,
-    "sae": 2287479808.0,
-    "accuracy": 1.0,
-    "precision": 0.0,
-    "recall": 0.0,
-    "f1": 0.0,
-    "train_loss": 0.29099547142563464
+    "mae": 9.169588088989258,
+    "sae": 0.1326805204153061,
+    "state_accuracy": 0.9969261507723046,
+    "state_precision": 0.6067415730337079,
+    "state_recall": 0.9152542372881356,
+    "state_f1": 0.7297297297297298,
+    "event_precision": 0.6162790697674418,
+    "event_recall": 0.9636363636363636,
+    "event_f1": 0.75177304964539,
+    "train_loss": 0.37283106474965616,
+    "epoch": 1.0
   },
-  "onnx": "kettle_attention.onnx"
+  "onnx": "kettle_attention.onnx",
+  "params": 9836166
 }

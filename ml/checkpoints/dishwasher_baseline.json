@@ -1,0 +1,29 @@
+{
+  "appliance": "dishwasher",
+  "model_name": "baseline",
+  "stats": {
+    "agg_mean": 381.19167577282053,
+    "agg_std": 460.7095024655755,
+    "y_mean": 18.247860212224854,
+    "y_std": 190.34697279112606
+  },
+  "window_size": 599,
+  "sample_period_s": 6,
+  "dataset": "ukdale_house1",
+  "on_threshold": 1874.9358407827547,
+  "metrics": {
+    "mae": 11.23060131072998,
+    "sae": 0.04736838489770889,
+    "state_accuracy": 0.9822485207100592,
+    "state_precision": 0.5555555555555556,
+    "state_recall": 0.3048780487804878,
+    "state_f1": 0.39370078740157477,
+    "event_precision": 0.32432432432432434,
+    "event_recall": 0.6,
+    "event_f1": 0.4210526315789474,
+    "train_loss": 0.4100304458932461,
+    "epoch": 1.0
+  },
+  "onnx": "dishwasher_baseline.onnx",
+  "params": 30704199
+}

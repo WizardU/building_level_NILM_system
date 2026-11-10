@@ -9,9 +9,11 @@
     >
       <view class="container">
         <view class="summary">
-          <text class="summary-title">当前电表</text>
+          <text class="summary-title">Current Meter</text>
           <text class="summary-value">{{ meterName }}</text>
-          <text class="summary-sub">共 {{ store.appliances.length }} 台设备 · {{ activeCount }} 台运行中</text>
+          <text class="summary-sub">
+            {{ store.appliances.length }} appliances · {{ activeCount }} running
+          </text>
         </view>
 
         <view class="filter-bar">
@@ -34,7 +36,7 @@
           />
         </view>
 
-        <text v-if="lastUpdate" class="last-update">更新于 {{ lastUpdate }}</text>
+        <text v-if="lastUpdate" class="last-update">Updated {{ lastUpdate }}</text>
       </view>
     </scroll-view>
   </view>
@@ -44,6 +46,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import ApplianceItem from '../../components/ApplianceItem.vue'
 import { getResult } from '../../utils/api.js'
+import { applianceLabel, applianceKey } from '../../utils/labels.js'
 import store, { activeDevicesCount } from '../../utils/store.js'
 
 const refreshing = ref(false)
@@ -51,9 +54,9 @@ const currentTab = ref('all')
 const lastUpdate = ref('')
 
 const tabs = [
-  { key: 'all', label: '全部' },
-  { key: 'on', label: '运行中' },
-  { key: 'off', label: '待机' }
+  { key: 'all', label: 'All' },
+  { key: 'on', label: 'Running' },
+  { key: 'off', label: 'Idle' }
 ]
 
 const meterName = computed(() => {
@@ -71,13 +74,15 @@ const filteredAppliances = computed(() => {
 function normalizeAppliances(apps) {
   return apps.map((a) => ({
     id: a.appliance_id || a.type,
-    key: a.type === 'washing_machine' ? 'washingMachine' : a.type,
-    name: a.name,
+    key: applianceKey(a.type),
+    type: a.type,
+    name: applianceLabel(a.type, a.name),
     power: Math.round(a.power_w || 0),
     state: !!a.state,
-    confidence: Math.round((a.confidence || 0.9) * 1000) / 10,
-    energyToday: `${(a.energy_kwh || 0).toFixed(2)} kWh`,
-    percentage: a.percentage || 0
+    confidence: Math.round((a.confidence || 0) * 1000) / 10,
+    energyToday: `${(a.energy_kwh || 0).toFixed(3)} kWh`,
+    percentage: a.percentage || 0,
+    threshold: a.threshold_w
   }))
 }
 

@@ -62,8 +62,12 @@ def export_one(pt_path: Path, rtol: float = 1e-3, atol: float = 1e-4) -> Path:
         "model_name": ckpt["model_name"],
         "stats": ckpt["stats"],
         "window_size": ckpt.get("window_size", WINDOW_SIZE),
+        "sample_period_s": ckpt.get("sample_period_s", 1),
+        "dataset": ckpt.get("dataset", ""),
+        "on_threshold": ckpt.get("on_threshold"),
         "metrics": ckpt.get("metrics", {}),
         "onnx": onnx_path.name,
+        "params": int(sum(p.numel() for p in model.parameters())),
     }
     meta_path = pt_path.with_suffix(".json")
     meta_path.write_text(json.dumps(meta, indent=2), encoding="utf-8")

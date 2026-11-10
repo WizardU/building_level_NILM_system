@@ -83,6 +83,9 @@ class Meter(Base):
 
 class Measurement(Base):
     __tablename__ = "measurements"
+    __table_args__ = (
+        UniqueConstraint("meter_id", "timestamp", name="uq_measurement_meter_ts"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     meter_id: Mapped[int] = mapped_column(ForeignKey("meters.id"), index=True)
@@ -125,7 +128,8 @@ class DisaggregationCache(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     meter_id: Mapped[int] = mapped_column(ForeignKey("meters.id"), index=True)
-    period: Mapped[str] = mapped_column(String(32))
+    # ``period`` holds a deterministic cache key: meter|start|end|model_version.
+    period: Mapped[str] = mapped_column(String(160))
     payload_json: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
@@ -148,6 +152,16 @@ class Alert(Base):
     type: Mapped[str] = mapped_column(String(32), default="warning")
     title: Mapped[str] = mapped_column(String(128))
     message: Mapped[str] = mapped_column(String(512))
+    title_en: Mapped[str] = mapped_column(String(128), default="")
+    message_en: Mapped[str] = mapped_column(String(512), default="")
     status: Mapped[str] = mapped_column(String(32), default="open")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     resolved: Mapped[bool] = mapped_column(Boolean, default=False)
+    dedupe_key: Mapped[str] = mapped_column(String(160), default="", index=True)
+
+
+class Setting(Base):
+    __tablename__ = "settings"
+
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    value: Mapped[str] = mapped_column(String(255))

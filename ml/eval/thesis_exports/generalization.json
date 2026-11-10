@@ -1,18 +1,18 @@
 [
   {
-    "train": "synth_house1 / UK-DALE-1",
-    "test": "synth_house1 holdout",
+    "train": "UK-DALE house 1",
+    "test": "UK-DALE house 1 (holdout)",
     "model": "attention",
-    "mae": 58.6656,
-    "f1": 0.15,
-    "note": "same-domain"
+    "mae": 11.4282,
+    "f1": 0.6811,
+    "note": "same-house holdout"
   },
   {
-    "train": "synth_house1 / UK-DALE-1",
-    "test": "REDD / UK-DALE-2 (TODO)",
+    "train": "UK-DALE house 1",
+    "test": "UK-DALE house 2 (cross-house)",
     "model": "attention",
     "mae": null,
     "f1": null,
-    "note": "cross-domain placeholder \u2014 run ukdale.py + train_all"
+    "note": "run preprocess.ukdale --house 2 and evaluate the same checkpoints"
   }
 ]

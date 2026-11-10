@@ -2,20 +2,28 @@
   "appliance": "fridge",
   "model_name": "attention",
   "stats": {
-    "agg_mean": 176.3984832763672,
-    "agg_std": 263.42578125,
-    "y_mean": 40.48735427856445,
-    "y_std": 56.82472229003906
+    "agg_mean": 381.19167577282053,
+    "agg_std": 460.7095024655755,
+    "y_mean": 39.08182276593879,
+    "y_std": 53.28366867130977
   },
   "window_size": 599,
+  "sample_period_s": 6,
+  "dataset": "ukdale_house1",
+  "on_threshold": 63.40820473891038,
   "metrics": {
-    "mae": 15.808815002441406,
-    "sae": 0.2327418327331543,
-    "accuracy": 1.0,
-    "precision": 1.0,
-    "recall": 1.0,
-    "f1": 1.0,
-    "train_loss": 0.8174837447576604
+    "mae": 22.913089752197266,
+    "sae": 0.037233661860227585,
+    "state_accuracy": 0.8596019365250135,
+    "state_precision": 0.8677444487728866,
+    "state_recall": 0.795109762627164,
+    "state_f1": 0.8298407376362112,
+    "event_precision": 0.7153061224489796,
+    "event_recall": 0.9859353023909986,
+    "event_f1": 0.8290952099349497,
+    "train_loss": 2.038582655756097,
+    "epoch": 3.0
   },
-  "onnx": "fridge_attention.onnx"
+  "onnx": "fridge_attention.onnx",
+  "params": 9836166
 }

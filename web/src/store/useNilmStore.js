@@ -3,15 +3,16 @@ import { ref, computed } from 'vue'
 
 export const useNilmStore = defineStore('nilm', () => {
   const appliances = ref([])
-  const selectedDataset = ref('ukdale')
-  const selectedModel = ref('proposed')
   const drawerVisible = ref(false)
   const buildingId = ref(Number(localStorage.getItem('building_id') || 1))
   const meterId = ref(Number(localStorage.getItem('meter_id') || 101))
   const buildings = ref([])
   const meters = ref([])
+  const backend = ref('')
+  const modelVersion = ref('')
+  const modelName = ref('')
 
-  const powerLimit = ref(3000)
+  const powerLimit = ref(Number(localStorage.getItem('power_limit') || 3000))
   const alertCount = ref(0)
   const language = ref(localStorage.getItem('lang') || 'zh')
 
@@ -40,15 +41,27 @@ export const useNilmStore = defineStore('nilm', () => {
     localStorage.setItem('building_id', String(id))
   }
 
+  const setPowerLimit = (value) => {
+    powerLimit.value = value
+    localStorage.setItem('power_limit', String(value))
+  }
+
+  const setEngine = (status) => {
+    backend.value = status?.backend || ''
+    modelVersion.value = status?.model_version || ''
+    modelName.value = status?.model_name || ''
+  }
+
   return {
     appliances,
-    selectedDataset,
-    selectedModel,
     drawerVisible,
     buildingId,
     meterId,
     buildings,
     meters,
+    backend,
+    modelVersion,
+    modelName,
     powerLimit,
     alertCount,
     language,
@@ -58,6 +71,8 @@ export const useNilmStore = defineStore('nilm', () => {
     toggleDrawer,
     setLanguage,
     setMeterId,
-    setBuildingId
+    setBuildingId,
+    setPowerLimit,
+    setEngine
   }
 })

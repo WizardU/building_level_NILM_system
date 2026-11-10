@@ -1,86 +1,66 @@
-# One-command Mobile (H5) demo for Windows PowerShell
+# One-command mobile (H5) demo on Windows.
+# Uses the bundled Node 22 in .tools when present, because uni-app requires >=22.12.
+param(
+    [switch]$ResetDb
+)
+
 $ErrorActionPreference = "Stop"
-$ROOT = Split-Path -Parent $PSScriptRoot
-Set-Location $ROOT
+$Root = Split-Path -Parent $PSScriptRoot
+Set-Location $Root
 
-$ML_PY = "$ROOT\ml\.venv\Scripts\python.exe"
-$BE_PY = "$ROOT\backend\.venv\Scripts\python.exe"
-$BE_UVICORN = "$ROOT\backend\.venv\Scripts\uvicorn.exe"
-$NPM = "npm"
+$BePython = "$Root\backend\.venv\Scripts\python.exe"
+$BundledNode = "$Root\.tools\node-v22.14.0-win-x64"
+$NodeDir = $null
+if (Test-Path "$BundledNode\node.exe") {
+    $NodeDir = $BundledNode
+} else {
+    $version = (& node --version) -replace "v", ""
+    $major = [int]($version.Split(".")[0])
+    if ($major -ge 22) { $NodeDir = (Split-Path (Get-Command node).Source) }
+}
 
-function Wait-ForUrl($url, $label, $max = 30) {
-    Write-Host -NoNewline "Waiting for $label ($url) "
-    for ($i = 0; $i -lt $max; $i++) {
-        try {
-            $r = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 1 -ErrorAction Stop
-            if ($r.StatusCode -eq 200) {
-                Write-Host " OK"
-                return
-            }
-        } catch {}
-        Write-Host -NoNewline "."
-        Start-Sleep -Seconds 1
-    }
-    Write-Host " FAILED"
+if (-not $NodeDir) {
+    Write-Host "Node >= 22.12 is required by uni-app."
+    Write-Host "Download it with:"
+    Write-Host "  $BePython -c ""import urllib.request; urllib.request.urlretrieve('https://nodejs.org/dist/v22.14.0/node-v22.14.0-win-x64.zip', '.tools/node22.zip')"""
     exit 1
 }
 
-Write-Host "==> Ensure synthetic data + models"
-if (-not (Test-Path "$ROOT\ml\.venv")) {
-    Set-Location "$ROOT\ml"; python -m venv .venv
-}
-& $ML_PY -m pip install -q -r "$ROOT\ml\requirements.txt"
-if (-not (Test-Path "$ROOT\data\processed\dataset_manifest.json")) {
-    & $ML_PY -m preprocess.generate_synthetic --days 2
-}
-if (-not (Test-Path "$ROOT\ml\checkpoints\fridge_attention.onnx")) {
-    & $ML_PY -m train.train_all --epochs 2 --models baseline attention
-    & $ML_PY -m export.export_onnx --all
+if (-not (Test-Path $BePython)) {
+    Write-Host "Backend venv missing. Run .\scripts\demo_web.ps1 once first."
+    exit 1
 }
 
-Write-Host "==> Start backend (SQLite) on http://127.0.0.1:8000"
-if (-not (Test-Path "$ROOT\backend\.venv")) {
-    Set-Location "$ROOT\backend"; python -m venv .venv
+if ($ResetDb) {
+    Remove-Item "$Root\backend\nilm.db" -Force -ErrorAction SilentlyContinue
 }
-& $BE_PY -m pip install -q -r "$ROOT\backend\requirements.txt"
 
-$backend = Start-Process -FilePath $BE_UVICORN -ArgumentList "app.main:app","--host","0.0.0.0","--port","8000","--log-level","warning" -WorkingDirectory "$ROOT\backend" -RedirectStandardOutput "$ROOT\backend\demo.log" -RedirectStandardError "$ROOT\backend\demo.err.log" -WindowStyle Hidden -PassThru
+Write-Host "==> Start backend on http://127.0.0.1:8000"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$Root\backend'; & '$BePython' -m uvicorn app.main:app --host 127.0.0.1 --port 8000"
 
-Wait-ForUrl "http://127.0.0.1:8000/health" "backend"
+for ($i = 0; $i -lt 40; $i++) {
+    try {
+        $ready = Invoke-RestMethod -Uri "http://127.0.0.1:8000/readyz" -TimeoutSec 2
+        if ($ready.models_ready) { break }
+    } catch {}
+    Start-Sleep -Seconds 1
+}
 
 Write-Host "==> Start replay adapter"
-$replay = Start-Process -FilePath $BE_PY -ArgumentList "-m","adapters.replay.cli","--meter-id","101","--speed","20" -WorkingDirectory "$ROOT\backend" -WindowStyle Hidden -PassThru
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$Root'; & '$BePython' -m adapters.replay.cli --meter-id 101 --speed 20"
 
-Start-Sleep -Seconds 2
-
-Write-Host "==> Install mobile dependencies (if needed)"
-Set-Location "$ROOT\mobile"
-if (-not (Test-Path "node_modules")) {
-    & $NPM install
+Write-Host "==> Start mobile H5 dev server (http://127.0.0.1:3100)"
+if (-not (Test-Path "$Root\mobile\node_modules")) {
+    Push-Location "$Root\mobile"
+    $env:PATH = "$NodeDir;$env:PATH"
+    & "$NodeDir\npm.cmd" install --no-audit --no-fund
+    Pop-Location
 }
-
-Write-Host "==> Start mobile H5 dev server"
-$mobile = Start-Process -FilePath $NPM -ArgumentList "run","dev:h5" -WorkingDirectory "$ROOT\mobile" -RedirectStandardOutput "$ROOT\mobile\demo.log" -RedirectStandardError "$ROOT\mobile\demo.err.log" -WindowStyle Hidden -PassThru
-
-Start-Sleep -Seconds 5
-
-$ip = (Get-NetIPAddress -AddressFamily IPv4 -PrefixOrigin Dhcp | Select-Object -First 1).IPAddress
-if (-not $ip) { $ip = "127.0.0.1" }
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "`$env:PATH = '$NodeDir;' + `$env:PATH; Set-Location '$Root\mobile'; & '$NodeDir\npm.cmd' run dev:h5"
 
 Write-Host ""
 Write-Host "================================================"
-Write-Host " Mobile demo is running!"
-Write-Host "   Mobile: http://$ip`:3100"
-Write-Host "   Local:  http://127.0.0.1:3100"
-Write-Host "   API:    http://127.0.0.1:8000"
-Write-Host "   Login:  admin / admin123"
-Write-Host "   Logs:   backend\demo.log, backend\replay.log, mobile\demo.log"
+Write-Host " Mobile: http://127.0.0.1:3100"
+Write-Host " API:    http://127.0.0.1:8000"
+Write-Host " Login:  admin / admin123"
 Write-Host "================================================"
-Write-Host "Press Enter to stop all demo processes."
-Read-Host
-
-Write-Host ""
-Write-Host "==> Stopping demo processes..."
-Stop-Process -Id $mobile.Id -ErrorAction SilentlyContinue
-Stop-Process -Id $replay.Id -ErrorAction SilentlyContinue
-Stop-Process -Id $backend.Id -ErrorAction SilentlyContinue

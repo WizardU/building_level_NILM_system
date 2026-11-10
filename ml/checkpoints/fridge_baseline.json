@@ -2,20 +2,28 @@
   "appliance": "fridge",
   "model_name": "baseline",
   "stats": {
-    "agg_mean": 176.3984832763672,
-    "agg_std": 263.42578125,
-    "y_mean": 40.48735427856445,
-    "y_std": 56.82472229003906
+    "agg_mean": 381.19167577282053,
+    "agg_std": 460.7095024655755,
+    "y_mean": 39.08182276593879,
+    "y_std": 53.28366867130977
   },
   "window_size": 599,
+  "sample_period_s": 6,
+  "dataset": "ukdale_house1",
+  "on_threshold": 60.90143114530123,
   "metrics": {
-    "mae": 6.728291034698486,
-    "sae": 0.04204312339425087,
-    "accuracy": 1.0,
-    "precision": 1.0,
-    "recall": 1.0,
-    "f1": 1.0,
-    "train_loss": 0.5102095268982447
+    "mae": 20.84943389892578,
+    "sae": 0.06439187377691269,
+    "state_accuracy": 0.8600630139091677,
+    "state_precision": 0.8798714343109683,
+    "state_recall": 0.7817240763876495,
+    "state_f1": 0.8278990643606465,
+    "event_precision": 0.7259565667011375,
+    "event_recall": 0.9873417721518988,
+    "event_f1": 0.8367103694874851,
+    "train_loss": 0.5747846929650557,
+    "epoch": 3.0
   },
-  "onnx": "fridge_baseline.onnx"
+  "onnx": "fridge_baseline.onnx",
+  "params": 30704199
 }

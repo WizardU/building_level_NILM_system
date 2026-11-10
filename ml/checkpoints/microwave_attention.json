@@ -2,20 +2,28 @@
   "appliance": "microwave",
   "model_name": "attention",
   "stats": {
-    "agg_mean": 176.3984832763672,
-    "agg_std": 263.42578125,
-    "y_mean": 2.385688543319702,
-    "y_std": 53.51359176635742
+    "agg_mean": 381.19167577282053,
+    "agg_std": 460.7095024655755,
+    "y_mean": 7.013531252740507,
+    "y_std": 95.73645405578287
   },
   "window_size": 599,
+  "sample_period_s": 6,
+  "dataset": "ukdale_house1",
+  "on_threshold": 132.90309254572938,
   "metrics": {
-    "mae": 1.9178011417388916,
-    "sae": 4027382272.0,
-    "accuracy": 1.0,
-    "precision": 0.0,
-    "recall": 0.0,
-    "f1": 0.0,
-    "train_loss": 0.1470229618751515
+    "mae": 8.881448745727539,
+    "sae": 0.6048493385314941,
+    "state_accuracy": 0.994005994005994,
+    "state_precision": 0.12903225806451613,
+    "state_recall": 0.07272727272727272,
+    "state_f1": 0.09302325581395349,
+    "event_precision": 0.2,
+    "event_recall": 0.16216216216216217,
+    "event_f1": 0.1791044776119403,
+    "train_loss": 0.599920563716809,
+    "epoch": 1.0
   },
-  "onnx": "microwave_attention.onnx"
+  "onnx": "microwave_attention.onnx",
+  "params": 9836166
 }

@@ -794,3 +794,145 @@ curl -H "Authorization: Bearer <token>" \
 | `backend/app/routers/` | 各模块路由实现 |
 | `backend/app/schemas.py` | Pydantic 请求/响应模型 |
 | `backend/app/models.py` | SQLAlchemy 数据库模型 |
+
+---
+
+## 13. 真实数据版本新增/变更接口（2026-11）
+
+### 13.1 健康检查（根路径，无需认证）
+
+#### GET /readyz
+
+返回数据库与推理后端状态；`status=ok` 表示两者都正常。
+
+```json
+{
+  "status": "ok",
+  "database": { "ok": true, "error": null },
+  "inference": {
+    "backend": "onnx",
+    "model_version": "38a6469e6afe",
+    "appliances": ["dishwasher", "fridge", "kettle", "microwave", "washing_machine"],
+    "sample_period_s": 6,
+    "window_size": 599,
+    "dataset": "ukdale_house1",
+    "model_name": "attention"
+  },
+  "models_ready": true
+}
+```
+
+`backend` 可能为 `onnx` / `torch-legacy` / `heuristic`；前端会据此显示降级提示。
+
+---
+
+### 13.2 模型状态
+
+#### GET /disaggregation/models
+
+```json
+{
+  "backend": "onnx",
+  "model_version": "38a6469e6afe",
+  "appliances": ["fridge", "kettle", "microwave", "dishwasher", "washing_machine"],
+  "dataset": "ukdale_house1",
+  "metrics": { "models": ["attention", "baseline"], "averages": { ... }, "rows": [ ... ] }
+}
+```
+
+---
+
+### 13.3 分解结果新增字段与参数
+
+#### GET /disaggregation/result
+
+新增查询参数：
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| refresh | bool | `true` 时跳过缓存强制重算 |
+
+新增响应字段：
+
+| 字段 | 说明 |
+|------|------|
+| start / end | 实际计算窗口（UTC，带 Z） |
+| model_version | 模型版本哈希 |
+| backend | 推理后端 |
+| sample_period_s | 采样周期（UK-DALE 为 6） |
+| inference_ms | 本次推理耗时（毫秒） |
+
+每个 appliance 新增 `threshold_w`（开机阈值）。
+
+缓存键为 `meter_id|start|end|model_version`，因此不同时间窗口不会互相覆盖。
+
+---
+
+### 13.4 评测指标
+
+#### GET /analytics/metrics
+
+返回 `ablation_metrics.json` 的结构化结果：
+
+```json
+{
+  "models": ["attention", "baseline"],
+  "averages": { "attention": { "mae": 11.4, "sae": 0.12, "state_f1": 0.68, "event_f1": 0.71 } },
+  "rows": [
+    { "appliance": "fridge", "model": "attention", "mae": 21.31, "sae": 0.006,
+      "state_f1": 0.781, "event_f1": 0.861, "on_threshold": 63.41, "samples": 13013 }
+  ],
+  "engine": { "backend": "onnx", "dataset": "ukdale_house1" }
+}
+```
+
+`/analytics/reports` 的雷达图维度改为：State F1 / Event F1 / Precision / Recall / SAE Score，全部来自真实测试集。
+
+---
+
+### 13.5 运行配置
+
+#### GET /analytics/settings
+
+```json
+{ "power_limit_w": 3000.0, "tariff_cny_per_kwh": 0.6,
+  "display_timezone": "Asia/Shanghai", "alert_cooldown_minutes": 10 }
+```
+
+#### PUT /analytics/settings
+
+```json
+{ "power_limit_w": 3500, "tariff_cny_per_kwh": 0.65 }
+```
+
+只接受白名单键，超出范围返回 400。
+
+---
+
+### 13.6 告警生命周期
+
+#### POST /analytics/alerts/{alert_id}/resolve
+
+将告警标记为已处理；`GET /analytics/alerts` 返回的 `resolved` 变为 `true`。
+
+告警同时返回中文 `title/message` 与英文 `title_en/message_en`，移动端使用英文。
+
+---
+
+### 13.7 电表当前读数
+
+#### GET /meters/{meter_id}/current
+
+返回 `phase_a/b/c` 与 `total_power_kw`，供移动端使用。
+
+---
+
+### 13.8 约定与限制
+
+- **所有时间均为 UTC**，响应字符串以 `Z` 结尾；前端按浏览器本地时区渲染。
+- 分页上限：`size <= 500`（历史数据接口放宽到 5000）。
+- 时间区间上限：31 天；单次上传样本上限 10,000。
+- 测量入库会去重（唯一约束 `(meter_id, timestamp)`），重复样本计入 `duplicates`。
+- 过载告警有冷却窗口（默认 10 分钟），不会每个样本都写一条。
+- FastAPI 自动生成的 OpenAPI（`/docs`、`/openapi.json`）是当前接口的唯一事实源；
+  `openapi/NILM.json` 保留为早期契约参考。

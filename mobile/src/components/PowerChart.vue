@@ -1,11 +1,11 @@
 <template>
   <view class="chart-card">
     <view class="header">
-      <text class="title">实时功率曲线</text>
+      <text class="title">Live Power</text>
       <text class="sub">W</text>
     </view>
     <view v-if="!chartData" class="empty">
-      <text class="empty-text">暂无数据</text>
+      <text class="empty-text">No data yet</text>
     </view>
     <qiun-data-charts
       v-else
