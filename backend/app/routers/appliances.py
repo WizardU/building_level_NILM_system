@@ -1,5 +1,3 @@
-from datetime import datetime, timedelta
-
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -8,6 +6,8 @@ from app.db import get_db
 from app.response import err, ok
 from app.schemas import ApplianceCreate
 from app.security import get_current_user
+from app.services.inference import disagg_service
+from app.utils.time import parse_utc, to_iso
 
 router = APIRouter(tags=["Appliances"])
 
@@ -144,17 +144,44 @@ def usage(
     db: Session = Depends(get_db),
     _: models.User = Depends(get_current_user),
 ):
-    a = db.get(models.Appliance, appliance_id)
-    if not a:
+    """Usage for the latest cached disaggregation window (no fabricated values)."""
+    appliance = db.get(models.Appliance, appliance_id)
+    if not appliance:
         return err("Not found", 404, 404)
-    end = datetime.utcnow()
-    start = end - timedelta(hours=4)
+    latest = disagg_service.latest_cached(db, appliance.meter_id)
+    match = None
+    if latest:
+        match = next(
+            (item for item in latest.get("appliances", []) if item.get("type") == appliance.type),
+            None,
+        )
+    if not match or not latest.get("start") or not latest.get("end"):
+        return ok(
+            {
+                "appliance_id": appliance.id,
+                "type": appliance.type,
+                "available": False,
+                "start": None,
+                "end": None,
+                "duration_hours": 0.0,
+                "energy_kwh": 0.0,
+                "avg_power_kw": 0.0,
+            }
+        )
+    start = parse_utc(latest["start"])
+    end = parse_utc(latest["end"])
+    duration = max((end - start).total_seconds() / 3600.0, 1e-6)
+    energy = float(match.get("energy_kwh", 0.0))
     return ok(
         {
-            "start": start.isoformat(),
-            "end": end.isoformat(),
-            "duration_hours": 4.5,
-            "energy_kwh": round(a.rated_power_kw * 2.5, 3),
-            "avg_power_kw": a.rated_power_kw,
+            "appliance_id": appliance.id,
+            "type": appliance.type,
+            "available": True,
+            "start": to_iso(start),
+            "end": to_iso(end),
+            "duration_hours": round(duration, 3),
+            "energy_kwh": round(energy, 4),
+            "avg_power_kw": round(energy / duration, 4),
+            "model_version": latest.get("model_version"),
         }
     )

@@ -50,18 +50,17 @@ def integrate_kwh(power_w: np.ndarray, times: list[datetime]) -> float:
 class DisaggregationService:
     def __init__(self) -> None:
         self.engine = None
-        self.legacy_engine = None
         self.backend = "heuristic"
         self.version = "heuristic"
         self._try_load()
 
     def _try_load(self) -> None:
         self.engine = None
-        self.legacy_engine = None
         self.backend = "heuristic"
         self.version = "heuristic"
 
-        # 1) ONNX models from the main pipeline
+        # ONNX models from the main pipeline. If they cannot be loaded we keep
+        # the explicit heuristic fallback so /readyz never lies about it.
         model_dir = Path(settings.model_dir)
         if model_dir.exists():
             try:
@@ -75,18 +74,6 @@ class DisaggregationService:
                     return
             except Exception as exc:  # noqa: BLE001 - fall back, but never hide it
                 logger.warning("ONNX engine unavailable: %s", exc)
-
-        # 2) legacy PyTorch checkpoints from the bundled reference project
-        try:
-            from app.services.legacy_inference import LegacyInferenceEngine
-
-            legacy = LegacyInferenceEngine()
-            if legacy.appliances:
-                self.legacy_engine = legacy
-                self.backend = "torch-legacy"
-                self.version = "legacy"
-        except Exception as exc:  # noqa: BLE001
-            logger.info("legacy engine unavailable: %s", exc)
 
     def reload(self) -> None:
         self._try_load()
@@ -164,9 +151,6 @@ class DisaggregationService:
         if self.engine and self.engine.appliances:
             series_map = self.engine.disaggregate_series(agg, stride=max(stride, 1))
             confidence = 0.9
-        elif self.legacy_engine and self.legacy_engine.appliances:
-            series_map = self.legacy_engine.disaggregate_series(agg)
-            confidence = 0.8
         else:
             series_map = self._heuristic(agg)
             confidence = 0.5

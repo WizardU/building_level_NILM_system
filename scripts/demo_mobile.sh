@@ -32,25 +32,28 @@ wait_for_url() {
   return 1
 }
 
-echo "==> Ensure synthetic data + models"
-(
-  cd "$ROOT/ml"
-  if [[ ! -d .venv ]]; then python -m venv .venv; fi
-  "$ML_PY" -m pip install -q -r requirements.txt
-  if [[ ! -f "$ROOT/data/processed/dataset_manifest.json" ]]; then
-    "$ML_PY" -m preprocess.generate_synthetic --days 2
-  fi
-  if [[ ! -f "$ROOT/ml/checkpoints/fridge_attention.onnx" ]]; then
-    "$ML_PY" -m train.train_all --epochs 2 --models baseline attention
-    "$ML_PY" -m export.export_onnx --all
-  fi
-)
+echo "==> Check real data and ONNX models"
+if [[ ! -f "$ROOT/data/raw/ukdale.h5" || ! -f "$ROOT/data/processed/dataset_manifest.json" ]]; then
+  echo "Missing UK-DALE data. Run scripts/download_datasets.py and preprocess.ukdale first (see DEMO.md)."
+  exit 1
+fi
+if ! ls "$ROOT/ml/checkpoints/"*_attention.onnx >/dev/null 2>&1; then
+  echo "Missing ONNX models. Run train_all + export_onnx first (see DEMO.md)."
+  exit 1
+fi
+NODE_MAJOR=$(node -p "process.versions.node.split('.')[0]" 2>/dev/null || echo 0)
+if [[ "$NODE_MAJOR" -lt 22 ]]; then
+  echo "Node >= 22.12 is required by uni-app (current: $(node --version 2>/dev/null || echo none))."
+  exit 1
+fi
 
 echo "==> Start backend (SQLite) on http://127.0.0.1:8000"
 (
   cd "$ROOT/backend"
   if [[ ! -d .venv ]]; then python -m venv .venv; fi
-  "$BE_PY" -m pip install -q -r requirements.txt
+  if ! "$BE_PY" -c "import fastapi, onnxruntime, sqlalchemy" >/dev/null 2>&1; then
+    "$BE_PY" -m pip install -q -r requirements.txt
+  fi
 )
 cd "$ROOT/backend"
 nohup "$BE_UVICORN" app.main:app --host 0.0.0.0 --port 8000 --log-level warning > "$ROOT/backend/demo.log" 2>&1 &

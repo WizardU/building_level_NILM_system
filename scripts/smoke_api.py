@@ -62,6 +62,15 @@ def main() -> int:
     current = call(api, f"/meters/{meter_id}/current", token=token)
     check("meter current alias", "phase_a" in current)
 
+    apps = call(api, f"/appliances?meter_id={meter_id}", token=token)
+    first_app = apps["items"][0]
+    usage = call(api, f"/appliances/{first_app['id']}/usage", token=token)
+    check(
+        "appliance usage",
+        usage.get("available") is True,
+        f"{first_app['type']} {usage.get('energy_kwh')} kWh",
+    )
+
     now = datetime.now(timezone.utc).replace(second=0, microsecond=0)
     start = now - timedelta(hours=2)
     query = urllib.parse.urlencode(
@@ -105,6 +114,13 @@ def main() -> int:
 
     settings = call(api, "/analytics/settings", token=token)
     check("settings", settings.get("power_limit_w", 0) > 0, json.dumps(settings, ensure_ascii=False))
+
+    whited = call(api, "/datasets/whited", token=token)
+    check(
+        "whited dataset",
+        whited.get("available") is True,
+        f"{whited.get('index', {}).get('classes')} classes",
+    )
 
     alerts = call(api, f"/analytics/alerts?building_id=1", token=token)
     check("alerts", alerts.get("total", 0) >= 1, alerts["items"][0].get("title_en", "") if alerts.get("items") else "")

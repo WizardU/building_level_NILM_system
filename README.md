@@ -16,8 +16,12 @@ real UK-DALE house 1 data through ONNX Runtime.
   parity checks.
 - **Evidence-based metrics**: every number on the Evaluation page comes from
   `ml/checkpoints/ablation_metrics.json` (13,013 test windows per appliance).
+- **Second dataset (WHITED)**: 994 start-up transients / 40 appliance labels /
+  100 devices, classified with 19 time-frequency features under a **device
+  holdout** split (18/40 classes evaluable): accuracy 44.1%, macro F1 27.0%,
+  top-3 71.8%. Exposed via `GET /datasets/whited` and the Evaluation page.
 - **End-to-end API**: login → buildings/meters → measurements → disaggregation
-  → analytics → alerts. `scripts/smoke_api.py` checks all of it.
+  → analytics → alerts → dataset cards. `scripts/smoke_api.py` checks the core.
 - **Web console**: live mains + per-appliance curves, KPI cards, real model
   metrics, billing/energy breakdown, alert lifecycle.
 - **Mobile client**: fully English UI, builds to H5 (uni-app + Node 22).
@@ -28,8 +32,8 @@ real UK-DALE house 1 data through ONNX Runtime.
 
 | Dataset | Role | Size | License |
 |---------|------|------|---------|
-| [UK-DALE](https://data.ceda.ac.uk/edc/d1/7d78f943-f9fe-413b-af52-1816f9d968b0) | Disaggregation training/evaluation | 5.1 GB zip → 5.9 GB HDF5 | CC BY 4.0 |
-| [WHITED](https://www.cs.cit.tum.de/dis/resources/whited/) | Appliance transient identification (optional) | 225 MB, 994 FLAC files | CC BY 4.0 |
+| [UK-DALE](https://data.ceda.ac.uk/edc/d1/7d78f943-f9fe-413b-af52-1816f9d968b0) | Disaggregation training/evaluation | 5.47 GB zip → 6.33 GB HDF5 | CC BY 4.0 |
+| [WHITED](https://www.cs.cit.tum.de/dis/resources/whited/) | Appliance identification (device-holdout baseline) | 225 MB, 994 FLAC files | CC BY 4.0 |
 
 Download both (resumable):
 
@@ -46,7 +50,7 @@ Files land in `data/raw/` (git-ignored) with a SHA-256 manifest.
 ## Quick start (Windows)
 
 ```powershell
-# First run only: downloads 5.1 GB, preprocesses, trains, exports ONNX
+# First run only: downloads 5.47 GB, preprocesses, trains, exports ONNX
 .\scripts\demo_web.ps1 -Download
 
 # Later runs
@@ -73,6 +77,7 @@ python -m preprocess.ukdale --h5 ..\data\raw\ukdale.h5 --house 1
 python -m train.train_all --models attention baseline --epochs 3 --device cuda
 python -m export.export_onnx --all
 python -m eval.export_thesis_tables
+python -m preprocess.whited --raw ..\data\raw\whited     # WHITED identification baseline
 ```
 
 ```bash
@@ -83,7 +88,7 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 
 The backend seeds the demo building and preloads one day of real UK-DALE
 samples on first start. `GET /readyz` reports the inference backend
-(`onnx` / `torch-legacy` / `heuristic`).
+(`onnx` or `heuristic`).
 
 ## Results (UK-DALE house 1, test split)
 
@@ -106,9 +111,9 @@ positive weighting, longer schedules) and `MIDTERM_STATUS.md`.
 
 | Path | Role |
 |------|------|
-| `openapi/` | Original contract (FastAPI `/docs` is now the source of truth) |
+| `openapi/` | Generated OpenAPI contract (`scripts/export_openapi.py`); `/docs` is live |
 | `ml/` | Preprocess, training, evaluation, ONNX export/inference |
-| `ml/legacy_nilm/` | Archived reference implementation (not on the demo path) |
+| `archive/legacy_nilm/` | Reference implementation from the original Nilm.rar (not on the runtime path) |
 | `backend/` | FastAPI + JWT + disaggregation + analytics |
 | `web/` | Vue 3 + Element Plus + ECharts console (bilingual) |
 | `mobile/` | uni-app client (English UI, H5/WeChat/App builds) |
@@ -136,7 +141,7 @@ All timestamps are UTC and serialized with a trailing `Z`.
 ## Tests and checks
 
 ```bash
-python scripts/smoke_api.py        # 19 end-to-end API checks
+python scripts/smoke_api.py        # 21 end-to-end API checks
 cd web && npm run build            # production build
 cd mobile && npm run build:h5      # H5 build (Node >= 22.12)
 ```
@@ -148,7 +153,9 @@ cd mobile && npm run build:h5      # H5 build (Node >= 22.12)
 - SQLite + `create_all` (no Alembic migrations yet); Postgres/Timescale is
   wired in Docker Compose but not exercised.
 - Mobile H5 is verified by build; device-level WeChat/App builds are untested.
-- WHITED is downloaded but not yet wired into a UI experiment.
+- WHITED is a **strict cross-device baseline**: 22 of 40 classes have a single
+  device and are train-only, so only 18 classes are evaluable; a raw-waveform
+  CNN is the next step.
 
 ## Team
 

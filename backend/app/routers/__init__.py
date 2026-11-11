@@ -5,6 +5,7 @@ from app.routers import (
     appliances,
     auth,
     buildings,
+    datasets,
     disaggregation,
     events,
     measurements,
@@ -20,3 +21,4 @@ api_router.include_router(events.router)
 api_router.include_router(disaggregation.router)
 api_router.include_router(appliances.router)
 api_router.include_router(analytics.router)
+api_router.include_router(datasets.router)

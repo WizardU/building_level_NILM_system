@@ -17,10 +17,16 @@ data/processed/
 data/csv_demo/
 ml/checkpoints/*.pt
 ml/checkpoints/*.onnx
+ml/checkpoints/*.joblib
+ml/checkpoints/whited_features.npz
 !ml/checkpoints/.gitkeep
 ml/legacy_nilm/data/
 ml/legacy_nilm/outputs/
 ml/legacy_nilm/.venv/
+archive/legacy_nilm/data/
+archive/legacy_nilm/outputs/
+archive/legacy_nilm/.venv/
+data/processed/synthetic/
 *.h5
 *.hdf5
 *.csv

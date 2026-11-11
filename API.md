@@ -822,7 +822,7 @@ curl -H "Authorization: Bearer <token>" \
 }
 ```
 
-`backend` 可能为 `onnx` / `torch-legacy` / `heuristic`；前端会据此显示降级提示。
+`backend` 可能为 `onnx` / `heuristic`；前端会据此显示降级提示。
 
 ---
 
@@ -936,3 +936,32 @@ curl -H "Authorization: Bearer <token>" \
 - 过载告警有冷却窗口（默认 10 分钟），不会每个样本都写一条。
 - FastAPI 自动生成的 OpenAPI（`/docs`、`/openapi.json`）是当前接口的唯一事实源；
   `openapi/NILM.json` 保留为早期契约参考。
+
+---
+
+### 13.9 WHITED 数据集与识别实验
+
+#### GET /datasets/whited
+
+返回 WHITED v1.1 的索引与离线分类实验指标：
+
+```json
+{
+  "available": true,
+  "index": {
+    "files": 994, "used": 994, "samplerate": 44100, "channels": 2,
+    "classes": 40, "devices": 100,
+    "class_counts": { "Kettle": 50, "Microwave": 20 }
+  },
+  "metrics": {
+    "best_model": "random_forest",
+    "models": {
+      "random_forest": { "accuracy": 0.441, "macro_f1": 0.2701, "top3_accuracy": 0.7179 }
+    },
+    "split": { "type": "device_holdout", "train_samples": 799, "test_samples": 195, "classes_in_test": 18 },
+    "confusion_top": [ { "true": "CoffeeMachine", "predicted": "Kettle", "count": 10 } ]
+  }
+}
+```
+
+未运行实验时 `available=false`，并给出运行命令。

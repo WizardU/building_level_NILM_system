@@ -33,26 +33,31 @@ wait_for_url() {
   return 1
 }
 
-echo "==> Ensure synthetic data + models"
-(
-  cd "$ROOT/ml"
-  if [[ ! -d .venv ]]; then python -m venv .venv; fi
-  "$ML_PY" -m pip install -q -r requirements.txt
-  if [[ ! -f "$ROOT/data/processed/dataset_manifest.json" ]]; then
-    "$ML_PY" -m preprocess.generate_synthetic --days 2
-  fi
-  if [[ ! -f "$ROOT/ml/checkpoints/fridge_attention.onnx" ]]; then
-    "$ML_PY" -m train.train_all --epochs 2 --models baseline attention
-    "$ML_PY" -m export.export_onnx --all
-  fi
-  "$ML_PY" -m eval.export_thesis_tables
-)
+echo "==> Check real data and ONNX models"
+if [[ ! -f "$ROOT/data/raw/ukdale.h5" ]]; then
+  echo "Missing data/raw/ukdale.h5."
+  echo "Run: python scripts/download_datasets.py --dataset ukdale && python scripts/extract_ukdale.py"
+  exit 1
+fi
+if [[ ! -f "$ROOT/data/processed/dataset_manifest.json" ]]; then
+  echo "Missing processed windows. Run:"
+  echo "  cd ml && python -m preprocess.ukdale --h5 ../data/raw/ukdale.h5 --house 1"
+  exit 1
+fi
+if ! ls "$ROOT/ml/checkpoints/"*_attention.onnx >/dev/null 2>&1; then
+  echo "Missing ONNX models. Run:"
+  echo "  cd ml && python -m train.train_all --models attention baseline --epochs 3 --device cuda"
+  echo "  cd ml && python -m export.export_onnx --all"
+  exit 1
+fi
 
 echo "==> Start backend (SQLite) on http://127.0.0.1:8000"
 (
   cd "$ROOT/backend"
   if [[ ! -d .venv ]]; then python -m venv .venv; fi
-  "$BE_PY" -m pip install -q -r requirements.txt
+  if ! "$BE_PY" -c "import fastapi, onnxruntime, sqlalchemy" >/dev/null 2>&1; then
+    "$BE_PY" -m pip install -q -r requirements.txt
+  fi
 )
 # launch backend directly (no subshell) so $! is the uvicorn process
 cd "$ROOT/backend"

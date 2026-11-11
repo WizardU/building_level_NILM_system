@@ -10,13 +10,13 @@
 | 模块 | 期中目标 | 状态 | 说明 |
 |------|----------|------|------|
 | 数据 | 接入真实数据集 | ✅ | UK-DALE house 1，2014-01 ~ 2014-06，6 秒采样 |
-| 数据 | 第二数据集 | ✅ | WHITED v1.1 已下载（994 个 FLAC，225 MB） |
+| 数据 | 第二数据集 | ✅ | WHITED v1.1：994 个 FLAC / 40 类 / 100 设备，已接入识别实验 |
 | 模型 | 最简单的真实数据训练 | ✅ | Seq2Point attention + baseline，各 3 epoch |
 | 部署 | ONNX 推理 | ✅ | 10 个模型全部导出，数值 parity 通过 |
 | 后端 | 真实数据链路 | ✅ | ONNX 后端、正确缓存键、UTC 时间、告警去重 |
 | Web | 真实指标展示 | ✅ | Evaluation/Analytics 全部改为真实数据 |
 | 移动端 | 可构建、可用 | ✅ | H5 构建通过，界面全英文 |
-| 工程质量 | 可验证 | ⚠️ | 19 项端到端 API 检查通过；单测/CI 尚未补 |
+| 工程质量 | 可验证 | ⚠️ | 21 项端到端 API 检查通过；单测/CI 尚未补 |
 
 ---
 
@@ -67,13 +67,31 @@ attention 使用加权 Huber（pos_weight=10），baseline 使用 MSE；阈值�
 3. 微波炉是最差项（F1 0.152），正样本仅 0.26%，需要更强的类别不平衡策略。
 4. 因此当前不能宣称"改进模型全面更优"。下一步应做：阈值/损失消融、更长训练、focal/BCE 辅助头；若仍无提升，论文应聚焦系统工程贡献并如实讨论。
 
+### 3.2 WHITED 电器识别（第二数据集）
+
+| 项 | 数值 |
+|----|------|
+| 数据 | WHITED v1.1，44.1 kHz 双声道（ch0 电压 / ch1 电流） |
+| 样本 | 994 个启动暂态 |
+| 类别 / 设备 | 40 类 / 100 台设备 |
+| 特征 | 19 维时频特征（RMS、峰值、波峰因数、过零率、偏度、峭度、质心、带宽、滚降、平坦度、主频、50 Hz 谐波占比、浪涌比、稳态变异、5 个频带能量） |
+| 划分 | 按设备留出：每类至少 1 台设备进训练，其余设备按 20% 进测试 |
+| 可评测类别 | 18 / 40（22 类只有 1 台设备，只能进训练） |
+| 最佳模型 | Random Forest（400 树，class_weight=balanced） |
+| 准确率 | **44.1%** |
+| Macro F1 | **27.0%** |
+| Top-3 准确率 | **71.8%** |
+
+**说明**：这是**严格跨设备**基线，不是同设备随机划分，因此数字低于论文中常见的同设备泄漏结果属于预期。下一步可用原始波形 1D-CNN 替换手工特征。
+
+
 ---
 
 ## 4. 系统验证
 
 ### 4.1 后端（`scripts/smoke_api.py`）
 
-19 项检查全部通过，包括：
+21 项检查全部通过，包括：
 
 - `/readyz` → `backend=onnx`，5 个电器，`sample_period_s=6`，`dataset=ukdale_house1`
 - 登录、建筑/电表、实时读数、`/meters/{id}/current`
@@ -82,6 +100,7 @@ attention 使用加权 Huber（pos_weight=10），baseline 使用 MSE；阈值�
 - KPI：mains 216 W，F1 0.681，event F1 0.711，推理 64.5 ms
 - 账单：0.439 kWh / 5 行分项
 - 评测：10 行（5 电器 × 2 模型），13,013 测试窗口
+- 设备用量：/appliances/{id}/usage 返回真实窗口电量
 - 告警：英文标题 "System Ready"
 
 ### 4.2 Web
@@ -113,6 +132,10 @@ attention 使用加权 Huber（pos_weight=10），baseline 使用 MSE；阈值�
 | 告警风暴 | 10 分钟冷却 + 每条告警英文文案 |
 | 移动端调用不存在接口 | 新增 `/meters/{id}/current` |
 | 移动端中文 | 全英文 UI + 英文设备/告警映射 |
+| 遗留 `ml/legacy_nilm` | 归档到 `archive/legacy_nilm`，删除后端 PyTorch 回退与旧导入脚本 |
+| 旧合成数据残留 | 删除 `data/processed/synth_*`；合成生成器改为写入独立目录 |
+| 过时 OpenAPI | 改为 `scripts/export_openapi.py` 从 FastAPI 生成（38 路径） |
+| WHITED 未接入 | 新增索引 + 设备留出分类实验 + `/datasets/whited` + Evaluation 卡片 |
 
 ---
 
@@ -139,7 +162,7 @@ attention 使用加权 Huber（pos_weight=10），baseline 使用 MSE；阈值�
 - [ ] 单元测试 + CI（pytest / Vitest / GitHub Actions）
 - [ ] Alembic 迁移与 Postgres/Timescale 实测
 - [ ] SSE 实时推送替代 30 秒轮询
-- [ ] WHITED 设备识别实验接入
+- [ ] WHITED 原始波形 CNN（当前手工特征基线 acc 44.1%）
 
 **P2**
 

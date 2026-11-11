@@ -13,7 +13,9 @@
 - ✅ 指标真实化：评测页/报表不再有硬编码分数，全部来自 13,013 个测试窗口
 - ✅ 缓存键、UTC 时区、`/readyz`、DB 唯一约束、告警冷却、输入上限
 - ✅ Web 构建通过；移动端 H5 构建通过且**界面全英文**
-- ⏳ 待办：P1（测试/CI/Alembic/RBAC/SSE）与 P2（量化/跨房屋/WHITED 实验）
+- ✅ 遗留清理：`legacy_nilm` 归档、合成数据残留删除、OpenAPI 改为自动生成；
+  WHITED 已接入识别实验与 Evaluation 卡片
+- ⏳ 待办：P1（测试/CI/Alembic/RBAC/SSE）与 P2（量化/跨房屋/WHITED CNN）
 
 详见 [MIDTERM_STATUS.md](MIDTERM_STATUS.md)。下文的 P0 清单保留为问题记录，便于论文"问题—解决"章节引用。
 

@@ -1,0 +1,293 @@
+{
+  "dataset": "WHITED v1.1",
+  "source": "https://huggingface.co/datasets/maduschek/WHITED",
+  "license": "CC BY 4.0",
+  "created_at": "2026-11-11T00:13:17.517960+00:00",
+  "samples": 994,
+  "classes": 40,
+  "devices": 100,
+  "features": [
+    "rms",
+    "peak",
+    "crest",
+    "zcr",
+    "skew",
+    "kurtosis",
+    "centroid",
+    "bandwidth",
+    "rolloff85",
+    "flatness",
+    "dominant_hz",
+    "harmonics_ratio",
+    "inrush_ratio",
+    "steady_cv",
+    "band_0_100",
+    "band_100_500",
+    "band_500_2k",
+    "band_2k_8k",
+    "band_8k_22k"
+  ],
+  "split": {
+    "type": "device_holdout",
+    "test_ratio": 0.2,
+    "seed": 42,
+    "train_devices": 80,
+    "test_devices": 20,
+    "classes_train_only": [
+      "AC",
+      "AirPump",
+      "BenchGrinder",
+      "CableModem",
+      "CableReceiver",
+      "DeepFryer",
+      "DesktopPC",
+      "Desoldering",
+      "FanHeater",
+      "Fridge",
+      "GuitarAmp",
+      "HIFI",
+      "Halogen",
+      "HalogenFluter",
+      "Heater",
+      "JigSaw",
+      "JuiceMaker",
+      "KitchenHood",
+      "LaserPrinter",
+      "MosquitoRepellent",
+      "MultiTool",
+      "NetworkSwitch"
+    ],
+    "train_samples": 799,
+    "test_samples": 195,
+    "classes_in_train": 40,
+    "classes_in_test": 18
+  },
+  "models": {
+    "random_forest": {
+      "accuracy": 0.441,
+      "macro_f1": 0.2701,
+      "weighted_f1": 0.3835,
+      "top3_accuracy": 0.7179
+    },
+    "logistic_regression": {
+      "accuracy": 0.2667,
+      "macro_f1": 0.1535,
+      "weighted_f1": 0.2475,
+      "top3_accuracy": 0.5846
+    }
+  },
+  "best_model": "random_forest",
+  "per_class": [
+    {
+      "label": "CFL",
+      "support": 10,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "label": "Charger",
+      "support": 10,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "label": "CoffeeMachine",
+      "support": 10,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "label": "DrillingMachine",
+      "support": 10,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "label": "Fan",
+      "support": 10,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "label": "FlatIron",
+      "support": 10,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "label": "GameConsole",
+      "support": 10,
+      "precision": 0.2439,
+      "recall": 1.0,
+      "f1": 0.3922
+    },
+    {
+      "label": "HairDryer",
+      "support": 10,
+      "precision": 1.0,
+      "recall": 0.2,
+      "f1": 0.3333
+    },
+    {
+      "label": "Iron",
+      "support": 10,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "label": "Kettle",
+      "support": 20,
+      "precision": 0.3913,
+      "recall": 0.9,
+      "f1": 0.5455
+    },
+    {
+      "label": "LEDLight",
+      "support": 20,
+      "precision": 0.9444,
+      "recall": 0.85,
+      "f1": 0.8947
+    },
+    {
+      "label": "Laptop",
+      "support": 10,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "label": "LightBulb",
+      "support": 10,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "label": "Massage",
+      "support": 10,
+      "precision": 0.6667,
+      "recall": 0.8,
+      "f1": 0.7273
+    },
+    {
+      "label": "Microwave",
+      "support": 10,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "label": "Mixer",
+      "support": 10,
+      "precision": 0.7,
+      "recall": 0.7,
+      "f1": 0.7
+    },
+    {
+      "label": "Monitor",
+      "support": 10,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "label": "PowerSupply",
+      "support": 5,
+      "precision": 1.0,
+      "recall": 0.8,
+      "f1": 0.8889
+    }
+  ],
+  "confusion_top": [
+    {
+      "true": "CoffeeMachine",
+      "predicted": "Kettle",
+      "count": 10
+    },
+    {
+      "true": "Iron",
+      "predicted": "Kettle",
+      "count": 10
+    },
+    {
+      "true": "Laptop",
+      "predicted": "GameConsole",
+      "count": 10
+    },
+    {
+      "true": "Monitor",
+      "predicted": "GameConsole",
+      "count": 10
+    },
+    {
+      "true": "Charger",
+      "predicted": "GameConsole",
+      "count": 9
+    },
+    {
+      "true": "FlatIron",
+      "predicted": "Microwave",
+      "count": 9
+    },
+    {
+      "true": "HairDryer",
+      "predicted": "Kettle",
+      "count": 8
+    },
+    {
+      "true": "CFL",
+      "predicted": "Charger",
+      "count": 6
+    }
+  ],
+  "skipped": [],
+  "class_counts": {
+    "AC": 10,
+    "AirPump": 10,
+    "BenchGrinder": 10,
+    "CFL": 20,
+    "CableModem": 10,
+    "CableReceiver": 10,
+    "Charger": 70,
+    "CoffeeMachine": 20,
+    "DeepFryer": 10,
+    "DesktopPC": 10,
+    "Desoldering": 10,
+    "DrillingMachine": 20,
+    "Fan": 60,
+    "FanHeater": 10,
+    "FlatIron": 20,
+    "Fridge": 10,
+    "GameConsole": 40,
+    "GuitarAmp": 10,
+    "HIFI": 10,
+    "HairDryer": 70,
+    "Halogen": 10,
+    "HalogenFluter": 10,
+    "Heater": 10,
+    "Iron": 50,
+    "JigSaw": 10,
+    "JuiceMaker": 10,
+    "Kettle": 89,
+    "KitchenHood": 10,
+    "LEDLight": 90,
+    "Laptop": 20,
+    "LaserPrinter": 10,
+    "LightBulb": 70,
+    "Massage": 30,
+    "Microwave": 30,
+    "Mixer": 40,
+    "Monitor": 20,
+    "MosquitoRepellent": 10,
+    "MultiTool": 10,
+    "NetworkSwitch": 10,
+    "PowerSupply": 15
+  }
+}

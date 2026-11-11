@@ -64,19 +64,68 @@
         :image-size="80"
       />
     </div>
+
+    <div v-if="whited.available" class="card block mt-20">
+      <h3>{{ $t('evaluation.whitedTitle') }}</h3>
+      <p class="desc">{{ $t('evaluation.whitedDesc') }}</p>
+      <el-descriptions :column="3" border size="small">
+        <el-descriptions-item :label="$t('evaluation.whitedSamples')">
+          {{ whited.index?.used ?? whited.metrics?.samples ?? '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item :label="$t('evaluation.classes')">
+          {{ whited.index?.classes ?? whited.metrics?.classes ?? '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item :label="$t('evaluation.devices')">
+          {{ whited.index?.devices ?? whited.metrics?.devices ?? '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item :label="$t('evaluation.evaluatedClasses')">
+          {{ whited.metrics?.split?.classes_in_test ?? '-' }} /
+          {{ whited.index?.classes ?? '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item :label="$t('evaluation.accuracy')">
+          {{ pct(whitedBest.accuracy) }}
+        </el-descriptions-item>
+        <el-descriptions-item :label="$t('evaluation.macroF1')">
+          {{ pct(whitedBest.macro_f1) }}
+        </el-descriptions-item>
+        <el-descriptions-item :label="$t('evaluation.top3')">
+          {{ pct(whitedBest.top3_accuracy) }}
+        </el-descriptions-item>
+      </el-descriptions>
+      <h4 class="sub-title">{{ $t('evaluation.confusion') }}</h4>
+      <el-table :data="(whited.metrics?.confusion_top || []).slice(0, 6)" size="small">
+        <el-table-column prop="true" :label="$t('evaluation.trueLabel')" />
+        <el-table-column prop="predicted" :label="$t('evaluation.predicted')" />
+        <el-table-column prop="count" :label="$t('evaluation.count')" width="90" />
+      </el-table>
+    </div>
+    <el-empty
+      v-else-if="!loading"
+      class="mt-20"
+      :description="$t('evaluation.whitedMissing')"
+      :image-size="60"
+    />
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getModelEvaluationMetrics, getModelStatus } from '../api/disaggregation'
+import { getWhitedDataset } from '../api/datasets'
 import RadarChart from '../charts/RadarChart.vue'
 
 const { t, te } = useI18n()
 const reports = ref({ indicators: [], series: [], per_appliance: [] })
 const engine = ref({})
+const whited = ref({ available: false })
 const loading = ref(false)
+
+const whitedBest = computed(() => {
+  const metrics = whited.value.metrics
+  if (!metrics?.best_model) return {}
+  return metrics.models?.[metrics.best_model] || {}
+})
 
 const keyOf = (type) => (type === 'washing_machine' ? 'washingMachine' : type)
 const pct = (value) => `${(Number(value || 0) * 100).toFixed(1)}%`
@@ -84,14 +133,17 @@ const pct = (value) => `${(Number(value || 0) * 100).toFixed(1)}%`
 onMounted(async () => {
   loading.value = true
   try {
-    const [reportData, status] = await Promise.all([
+    const [reportData, status, whitedData] = await Promise.all([
       getModelEvaluationMetrics(),
-      getModelStatus()
+      getModelStatus(),
+      getWhitedDataset()
     ])
     reports.value = reportData || {}
     engine.value = status || {}
+    whited.value = whitedData || { available: false }
   } catch (err) {
     reports.value = { indicators: [], series: [], per_appliance: [] }
+    whited.value = { available: false }
   } finally {
     loading.value = false
   }
@@ -111,6 +163,17 @@ onMounted(async () => {
   color: #64748b;
   font-size: 14px;
   line-height: 1.6;
+}
+.block {
+  height: auto;
+}
+.mt-20 {
+  margin-top: 20px;
+}
+.sub-title {
+  margin: 18px 0 10px;
+  color: #0f172a;
+  font-size: 14px;
 }
 .mb-20 {
   margin-bottom: 20px;

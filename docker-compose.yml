@@ -28,6 +28,7 @@ services:
       - "8000:8000"
     volumes:
       - ./ml/checkpoints:/models:ro
+      - ./ml:/ml:ro
       - ./data:/data:ro
     depends_on:
       db:

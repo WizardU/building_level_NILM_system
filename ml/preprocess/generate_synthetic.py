@@ -1,4 +1,9 @@
-"""Generate synthetic building power traces when UK-DALE is unavailable."""
+"""Generate synthetic building traces as an offline fallback.
+
+This is **not** the main data path. The active pipeline uses UK-DALE
+(``preprocess.ukdale``); synthetic output goes to ``data/processed/synthetic``
+so it can never overwrite the real ``dataset_manifest.json``.
+"""
 
 from __future__ import annotations
 
@@ -13,6 +18,7 @@ from .cleaning import sliding_windows
 from .config import (
     APPLIANCES,
     PROCESSED_DIR,
+    ROOT,
     STRIDE_EVAL,
     STRIDE_TRAIN,
     SYNTH_PROFILES,
@@ -99,7 +105,9 @@ def write_windows(
             with h5py.File(path, "w") as f:
                 f.create_dataset("x", data=x, compression="gzip")
                 f.create_dataset("y", data=y, compression="gzip")
-            manifest["files"].setdefault(app, {})[split] = str(path.relative_to(out_dir.parent.parent))
+            manifest["files"].setdefault(app, {})[split] = str(
+                path.relative_to(ROOT)
+            ).replace("\\", "/")
     # Also dump raw 1Hz CSV sample for replay (first day)
     replay_dir = out_dir / "replay"
     replay_dir.mkdir(exist_ok=True)
@@ -110,21 +118,23 @@ def write_windows(
         aggregate=agg[:day],
         **{k: series[k][:day] for k in APPLIANCES},
     )
-    manifest["replay"] = str(replay_path.relative_to(out_dir.parent.parent))
+    manifest["replay"] = str(replay_path.relative_to(ROOT)).replace("\\", "/")
     man_path = out_dir / "dataset_manifest.json"
     man_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     return manifest
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Generate synthetic NILM windows")
+    parser = argparse.ArgumentParser(description="Generate synthetic NILM windows (fallback)")
     parser.add_argument("--days", type=int, default=3)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--out", type=Path, default=PROCESSED_DIR / "synthetic")
     args = parser.parse_args()
     series = generate_house(days=args.days, seed=args.seed)
-    man = write_windows(series, PROCESSED_DIR)
-    print(f"Wrote manifest → {PROCESSED_DIR / 'dataset_manifest.json'}")
+    man = write_windows(series, args.out)
+    print(f"Wrote manifest → {args.out / 'dataset_manifest.json'}")
     print(f"Appliances: {man['appliances']}")
+    print("Synthetic fallback is not used by the demo; UK-DALE is the primary dataset.")
 
 
 if __name__ == "__main__":

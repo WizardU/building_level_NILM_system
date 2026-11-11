@@ -25,7 +25,6 @@ const zh = {
   status: {
     backend: {
       onnx: 'ONNX 推理',
-      'torch-legacy': 'PyTorch 旧模型',
       heuristic: '启发式兜底',
       unknown: '未知'
     },
@@ -84,7 +83,22 @@ const zh = {
     samples: '测试窗口数',
     noData: '尚未生成评测结果，请先运行训练与评估脚本',
     engine: '推理引擎',
-    dataset: '数据集'
+    dataset: '数据集',
+    whitedTitle: 'WHITED 电器识别实验',
+    whitedDesc:
+      '基于 44.1 kHz 启动暂态电流的 19 维时频特征，随机森林/逻辑回归分类；按设备分组划分，避免同一设备泄漏到测试集。',
+    whitedSamples: '暂态样本',
+    classes: '电器类别',
+    devices: '设备数',
+    evaluatedClasses: '评测类别',
+    accuracy: '准确率',
+    macroF1: 'Macro F1',
+    top3: 'Top-3 准确率',
+    confusion: '主要混淆对',
+    trueLabel: '真实类别',
+    predicted: '预测类别',
+    count: '次数',
+    whitedMissing: 'WHITED 尚未运行：cd ml && python -m preprocess.whited'
   },
   team: {
     drawerTitle: '项目架构与毕业设计分工',
@@ -179,7 +193,6 @@ const en = {
   status: {
     backend: {
       onnx: 'ONNX runtime',
-      'torch-legacy': 'Legacy PyTorch',
       heuristic: 'Heuristic fallback',
       unknown: 'Unknown'
     },
@@ -236,7 +249,22 @@ const en = {
     samples: 'Test windows',
     noData: 'No evaluation yet. Run training and evaluation first.',
     engine: 'Engine',
-    dataset: 'Dataset'
+    dataset: 'Dataset',
+    whitedTitle: 'WHITED Appliance Identification',
+    whitedDesc:
+      '19 time/frequency features from 44.1 kHz start-up current; Random Forest / Logistic Regression. Split by device so transients of the same device never leak into the test set.',
+    whitedSamples: 'Transients',
+    classes: 'Classes',
+    devices: 'Devices',
+    evaluatedClasses: 'Evaluated classes',
+    accuracy: 'Accuracy',
+    macroF1: 'Macro F1',
+    top3: 'Top-3 accuracy',
+    confusion: 'Top confusions',
+    trueLabel: 'True label',
+    predicted: 'Predicted',
+    count: 'Count',
+    whitedMissing: 'WHITED not run yet: cd ml && python -m preprocess.whited'
   },
   team: {
     drawerTitle: 'Architecture & Roles',

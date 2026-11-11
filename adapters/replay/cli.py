@@ -36,7 +36,10 @@ def main() -> None:
 
     if not args.npz.exists():
         raise SystemExit(
-            f"Missing {args.npz}. Run: cd ml && python -m preprocess.generate_synthetic"
+            f"Missing {args.npz}. Build the real dataset first:\n"
+            "  python scripts/download_datasets.py --dataset ukdale\n"
+            "  python scripts/extract_ukdale.py\n"
+            "  cd ml && python -m preprocess.ukdale --h5 ..\\data\\raw\\ukdale.h5 --house 1"
         )
 
     src = ReplaySource(args.npz, loop=True)

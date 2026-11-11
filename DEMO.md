@@ -45,11 +45,16 @@ cd ml
 .\scripts\demo_web.ps1              # 之后：直接启动
 ```
 
-可选：下载 WHITED（电器启动暂态数据，用于设备识别实验）
+可选：下载并运行 WHITED（电器启动暂态，用于设备识别实验）
 
 ```powershell
 python scripts/download_datasets.py --dataset whited
+cd ml
+.\.venv\Scripts\python.exe -m preprocess.whited --raw ..\data\raw\whited
 ```
+
+结果会出现在 Evaluation 页的「WHITED 电器识别实验」卡片，也可通过
+`GET /api/v1/datasets/whited` 查看。
 
 ---
 
@@ -112,7 +117,9 @@ npm run dev
 
 - 雷达图：State F1 / Event F1 / Precision / Recall / SAE Score
 - 每电器测试集指标表（10 行 = 5 电器 × 2 模型）
-- 数据来自 `ml/checkpoints/ablation_metrics.json`，无占位分数
+- WHITED 电器识别卡片：994 个启动暂态、40 类、100 台设备；设备留出下
+  18/40 类可评测（RF acc 44.1%、macro-F1 27.0%、top-3 71.8%）
+- 数据来自 `ml/checkpoints/ablation_metrics.json` 与 `whited_metrics.json`，无占位分数
 
 ### 4.3 Analytics（用电分析）
 
