@@ -1,5 +1,7 @@
 # Model evidence — 2026-11-20
 
+Evidence commit: `8ae56fd` · tag: `midterm-2026-11-30-evidence`.
+
 All numbers are test-set values. The three models below use **MSE** (the proposal's baseline loss), same 8 epochs and seed 42; the loss ablation is separate.
 
 ## 1. Three-model ablation (UK-DALE house 1, test 13,013 windows/appliance)
