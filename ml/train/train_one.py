@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import random
 from pathlib import Path
 
@@ -36,16 +37,27 @@ def resolve_file(manifest: dict, appliance: str, split: str) -> Path:
     return p
 
 
-def _predict(model: torch.nn.Module, loader: DataLoader, device: torch.device, stats: dict):
+def _predict(
+    model: torch.nn.Module,
+    loader: DataLoader,
+    device: torch.device,
+    stats: dict,
+    criterion: torch.nn.Module | None = None,
+):
     model.eval()
-    preds, trues = [], []
+    preds, trues, losses = [], [], []
     with torch.no_grad():
         for x, y in loader:
-            preds.append(model(x.to(device)).cpu().numpy())
+            x_dev, y_dev = x.to(device), y.to(device)
+            output = model(x_dev)
+            if criterion is not None:
+                losses.append(float(criterion(output, y_dev).item()))
+            preds.append(output.cpu().numpy())
             trues.append(y.numpy())
     y_pred = np.concatenate(preds) * stats["y_std"] + stats["y_mean"]
     y_true = np.concatenate(trues) * stats["y_std"] + stats["y_mean"]
-    return y_true, np.clip(y_pred, 0.0, None)
+    val_loss = float(np.mean(losses)) if losses else None
+    return y_true, np.clip(y_pred, 0.0, None), val_loss
 
 
 def train(
@@ -58,12 +70,16 @@ def train(
     use_weighted_huber: bool = False,
     device_name: str | None = None,
     num_workers: int = 0,
+    run_name: str | None = None,
+    loss_name: str | None = None,
 ) -> dict:
     seed_everything(seed)
     manifest = json.loads((PROCESSED_DIR / "dataset_manifest.json").read_text(encoding="utf-8"))
     if appliance not in manifest["files"]:
         raise SystemExit(f"{appliance} missing from dataset manifest")
 
+    loss_name = loss_name or ("weighted_huber" if use_weighted_huber else "mse")
+    run_name = run_name or f"{appliance}_{model_name}"
     train_ds = WindowDataset(resolve_file(manifest, appliance, "train"))
     val_ds = WindowDataset(resolve_file(manifest, appliance, "val"))
     train_loader = DataLoader(
@@ -84,15 +100,19 @@ def train(
     stats = manifest["stats"][appliance]
     default_threshold = float(ON_THRESHOLDS[appliance])
     best_val = float("inf")
+    best_score = -1.0
     history: list[dict] = []
-    ckpt_path = CKPT_DIR / f"{appliance}_{model_name}.pt"
+    ckpt_path = CKPT_DIR / f"{run_name}.pt"
     CKPT_DIR.mkdir(parents=True, exist_ok=True)
 
     for epoch in range(1, epochs + 1):
         model.train()
         losses = []
         for x, y in tqdm(
-            train_loader, desc=f"{appliance}/{model_name} ep{epoch}", leave=False
+            train_loader,
+            desc=f"{appliance}/{model_name} ep{epoch}",
+            leave=False,
+            disable=os.environ.get("NILM_QUIET") == "1",
         ):
             x, y = x.to(device), y.to(device)
             opt.zero_grad()
@@ -103,24 +123,35 @@ def train(
             opt.step()
             losses.append(loss.item())
 
-        y_true, y_pred = _predict(model, val_loader, device, stats)
+        y_true, y_pred, val_loss = _predict(model, val_loader, device, stats, criterion)
         metrics = evaluate_all(y_true, y_pred, default_threshold)
         metrics["train_loss"] = float(np.mean(losses)) if losses else float("nan")
+        metrics["val_loss"] = val_loss if val_loss is not None else float("nan")
         metrics["epoch"] = epoch
         history.append({k: float(v) for k, v in metrics.items()})
         print(
             f"[{appliance}|{model_name}] epoch {epoch}: "
-            f"loss={metrics['train_loss']:.4f} mae={metrics['mae']:.2f} "
-            f"sae={metrics['sae']:.3f} state_f1={metrics['state_f1']:.3f} "
-            f"event_f1={metrics['event_f1']:.3f}"
+            f"train_loss={metrics['train_loss']:.4f} val_loss={metrics['val_loss']:.4f} "
+            f"mae={metrics['mae']:.2f} sae={metrics['sae']:.3f} "
+            f"state_f1={metrics['state_f1']:.3f} event_f1={metrics['event_f1']:.3f}"
         )
 
-        if metrics["mae"] < best_val:
+        # Select on validation event-F1 (the metric we report), with MAE as a
+        # tie-breaker. Selecting on MAE alone favours near-zero predictions for
+        # rare appliances such as the microwave.
+        score = float(metrics["event_f1"])
+        better = score > best_score + 1e-9 or (
+            abs(score - best_score) <= 1e-9 and metrics["mae"] < best_val
+        )
+        if better:
+            best_score = score
             best_val = float(metrics["mae"])
             torch.save(
                 {
                     "model_name": model_name,
                     "appliance": appliance,
+                    "run_name": run_name,
+                    "loss": loss_name,
                     "state_dict": model.state_dict(),
                     "stats": stats,
                     "window_size": WINDOW_SIZE,
@@ -137,19 +168,21 @@ def train(
 
     checkpoint = torch.load(ckpt_path, map_location="cpu", weights_only=False)
     model.load_state_dict(checkpoint["state_dict"])
-    y_true, y_pred = _predict(model, val_loader, device, stats)
+    y_true, y_pred, _ = _predict(model, val_loader, device, stats)
     threshold, calibrated_f1 = calibrate_threshold(y_true, y_pred, default_threshold)
     checkpoint["on_threshold"] = threshold
     checkpoint["val_event_f1"] = calibrated_f1
     torch.save(checkpoint, ckpt_path)
     print(
-        f"[{appliance}|{model_name}] best val MAE={best_val:.2f}, "
-        f"threshold={threshold:.1f} W (val event F1={calibrated_f1:.3f})"
+        f"[{appliance}|{model_name}] best val event F1={best_score:.3f}, MAE={best_val:.2f}, "
+        f"threshold={threshold:.1f} W (calibrated val event F1={calibrated_f1:.3f})"
     )
 
     return {
         "appliance": appliance,
         "model": model_name,
+        "run": run_name,
+        "loss": loss_name,
         "history": history,
         "best_mae": best_val,
         "on_threshold": threshold,
@@ -169,6 +202,8 @@ def main() -> None:
     parser.add_argument("--device", default=None, help="cpu / cuda / cuda:0")
     parser.add_argument("--num-workers", type=int, default=0)
     parser.add_argument("--weighted-huber", action="store_true")
+    parser.add_argument("--run-name", default=None)
+    parser.add_argument("--loss-name", default=None)
     args = parser.parse_args()
     train(
         args.appliance,
@@ -180,6 +215,8 @@ def main() -> None:
         use_weighted_huber=args.weighted_huber,
         device_name=args.device,
         num_workers=args.num_workers,
+        run_name=args.run_name,
+        loss_name=args.loss_name,
     )
 
 

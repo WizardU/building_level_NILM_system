@@ -877,10 +877,10 @@ curl -H "Authorization: Bearer <token>" \
 ```json
 {
   "models": ["attention", "baseline"],
-  "averages": { "attention": { "mae": 11.4, "sae": 0.12, "state_f1": 0.68, "event_f1": 0.71 } },
+  "averages": { "attention": { "mae": 10.45, "sae": 0.109, "state_f1": 0.762, "event_f1": 0.797 } },
   "rows": [
-    { "appliance": "fridge", "model": "attention", "mae": 21.31, "sae": 0.006,
-      "state_f1": 0.781, "event_f1": 0.861, "on_threshold": 63.41, "samples": 13013 }
+    { "appliance": "fridge", "model": "attention", "mae": 22.70, "sae": 0.102,
+      "state_f1": 0.815, "event_f1": 0.878, "on_threshold": 63.33, "samples": 13013 }
   ],
   "engine": { "backend": "onnx", "dataset": "ukdale_house1" }
 }

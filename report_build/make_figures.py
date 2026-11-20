@@ -167,27 +167,27 @@ def fig_disagg(data) -> None:
 
 def fig_metrics() -> None:
     rows = json.loads((ROOT / "ml/checkpoints/ablation_metrics.json").read_text(encoding="utf-8"))
+    rows = [r for r in rows if r.get("loss") == "mse"]
     order = APPLIANCES + ["__mean__"]
-    fig, ax = plt.subplots(figsize=(9.0, 4.6))
+    models = [("baseline", "Baseline CNN", GREY), ("dilated", "Dilated only", ORANGE), ("attention", "Attention (proposed)", GREEN)]
+    fig, ax = plt.subplots(figsize=(9.4, 4.7))
     y = np.arange(len(order))
-    width = 0.36
-    attention = []
-    baseline = []
+    height = 0.24
+    offsets = [-height, 0.0, height]
+    values_by_model = {name: [] for name, _, _ in models}
     for appliance in order:
-        if appliance == "__mean__":
-            a = np.mean([r["event_f1"] for r in rows if r["model"] == "attention"])
-            b = np.mean([r["event_f1"] for r in rows if r["model"] == "baseline"])
-        else:
-            a = next(r["event_f1"] for r in rows if r["appliance"] == appliance and r["model"] == "attention")
-            b = next(r["event_f1"] for r in rows if r["appliance"] == appliance and r["model"] == "baseline")
-        attention.append(a)
-        baseline.append(b)
+        for name, _, _ in models:
+            if appliance == "__mean__":
+                value = np.mean([r["event_f1"] for r in rows if r["model"] == name])
+            else:
+                value = next(r["event_f1"] for r in rows if r["appliance"] == appliance and r["model"] == name)
+            values_by_model[name].append(value)
 
-    ax.barh(y + width / 2, attention, height=width, color=GREEN, label="Attention (proposed)")
-    ax.barh(y - width / 2, baseline, height=width, color=GREY, label="Baseline CNN")
-    for idx, (a, b) in enumerate(zip(attention, baseline)):
-        ax.text(a + 0.01, idx + width / 2, f"{a:.2f}", va="center", fontsize=9, color=TEAL_DARK)
-        ax.text(b + 0.01, idx - width / 2, f"{b:.2f}", va="center", fontsize=9, color="#64748B")
+    for (name, label, color), offset in zip(models, offsets):
+        values = values_by_model[name]
+        ax.barh(y + offset, values, height=height, color=color, label=label)
+        for idx, value in enumerate(values):
+            ax.text(value + 0.01, idx + offset, f"{value:.2f}", va="center", fontsize=8, color=TEAL_DARK if name == "attention" else "#64748B")
     ax.set_yticks(y)
     ax.set_yticklabels([LABELS.get(a, "Average") for a in order], fontsize=11)
     ax.invert_yaxis()
@@ -197,9 +197,9 @@ def fig_metrics() -> None:
     ax.legend(
         loc="lower right",
         bbox_to_anchor=(1.0, 1.02),
-        ncol=2,
+        ncol=3,
         frameon=False,
-        fontsize=10,
+        fontsize=9,
     )
     fig.tight_layout()
     fig.savefig(OUT / "fig_metrics.png", dpi=200, bbox_inches="tight")

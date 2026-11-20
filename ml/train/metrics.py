@@ -9,6 +9,10 @@ def mae(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     return float(np.mean(np.abs(y_true - y_pred)))
 
 
+def rmse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    return float(np.sqrt(np.mean((y_true - y_pred) ** 2)))
+
+
 def sae(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """Normalized sum of absolute energy errors (capped for empty/sparse targets)."""
     denom = float(np.sum(np.abs(y_true)))
@@ -74,6 +78,7 @@ def evaluate_all(
 ) -> dict[str, float]:
     out = {
         "mae": mae(y_true, y_pred),
+        "rmse": rmse(y_true, y_pred),
         "sae": sae(y_true, y_pred),
     }
     out.update({f"state_{k}": v for k, v in classification_scores(y_true, y_pred, on_threshold).items()})

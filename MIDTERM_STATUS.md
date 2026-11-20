@@ -11,8 +11,8 @@
 |------|----------|------|------|
 | 数据 | 接入真实数据集 | ✅ | UK-DALE house 1，2014-01 ~ 2014-06，6 秒采样 |
 | 数据 | 第二数据集 | ✅ | WHITED v1.1：994 个 FLAC / 40 类 / 100 设备，已接入识别实验 |
-| 模型 | 最简单的真实数据训练 | ✅ | Seq2Point attention + baseline，各 3 epoch |
-| 部署 | ONNX 推理 | ✅ | 10 个模型全部导出，数值 parity 通过 |
+| 模型 | 真实数据训练 + 消融 | ✅ | 三模型 MSE 各 8 epoch：attention 0.797 / 10.45 W，baseline 0.789 / 12.45 W，dilated 0.786 / 12.99 W；另做 2×2 损失消融与 house2 跨房屋测试 |
+| 部署 | ONNX 推理 | ✅ | 5 个在线 attention ONNX 已切换为 MSE 版本；ablation checkpoints 全部导出，数值 parity 通过 |
 | 后端 | 真实数据链路 | ✅ | ONNX 后端、正确缓存键、UTC 时间、告警去重 |
 | Web | 真实指标展示 | ✅ | Evaluation/Analytics 全部改为真实数据 |
 | 移动端 | 可构建、可用 | ✅ | H5 构建通过，界面全英文 |
@@ -48,24 +48,26 @@
 
 ## 3. 模型与指标
 
-训练环境：RTX 3070 Laptop 8 GB，PyTorch 2.14.1+cu126，batch 128，Adam 1e-4，3 epoch。
-attention 使用加权 Huber（pos_weight=10），baseline 使用 MSE；阈值在验证集上按 event-F1 搜索。
+训练环境：RTX 3070 Laptop 8 GB，PyTorch 2.14.1+cu126，batch 128，Adam 1e-4，8 epoch。
+三模型统一使用 **MSE**（proposal 的 baseline 损失），同 seed；checkpoint 按验证集 event-F1 选择，阈值在验证集上校准。另做 2×2 损失消融（MSE vs 加权 Huber）。
 
-| 电器 | Attention MAE | SAE | State F1 | Event F1 | Baseline MAE | State F1 | Event F1 |
-|------|--------------:|----:|---------:|---------:|-------------:|---------:|---------:|
-| fridge | 21.31 W | 0.006 | 0.781 | 0.861 | 20.53 W | 0.784 | 0.872 |
-| kettle | 9.21 W | 0.153 | 0.744 | 0.755 | 8.14 W | 0.821 | 0.835 |
-| microwave | 6.76 W | 0.345 | 0.152 | 0.288 | 7.08 W | 0.329 | 0.413 |
-| dishwasher | 8.72 W | 0.105 | 0.845 | 0.810 | 9.53 W | 0.724 | 0.759 |
-| washing machine | 11.15 W | 0.013 | 0.884 | 0.840 | 13.38 W | 0.952 | 0.909 |
-| **均值** | — | — | **0.681** | **0.711** | — | **0.722** | — |
+| 电器 | Baseline Event F1 | Dilated Event F1 | Attention Event F1 | Baseline MAE | Dilated MAE | Attention MAE |
+|------|------------------:|-----------------:|-------------------:|-------------:|------------:|--------------:|
+| fridge | 0.901 | 0.890 | 0.878 | 22.61 W | 24.09 W | 22.70 W |
+| kettle | 0.852 | 0.853 | 0.860 | 8.03 W | 10.41 W | 6.98 W |
+| microwave | 0.439 | 0.456 | 0.407 | 7.95 W | 7.36 W | 5.91 W |
+| dishwasher | 0.872 | 0.857 | 0.895 | 12.34 W | 7.02 W | 6.96 W |
+| washing machine | 0.881 | 0.873 | 0.943 | 11.32 W | 16.05 W | 9.69 W |
+| **均值** | **0.789** | **0.786** | **0.797** | **12.45 W** | **12.99 W** | **10.45 W** |
 
 **解读（如实报告）**
 
-1. attention 在洗碗机、洗衣机上明显更好（MAE、SAE、F1 均改善），尤其 SAE 从 0.316 → 0.013（洗衣机）。
-2. baseline 在水壶、微波炉上仍更强，导致**平均 State F1 尚未超过 baseline**（0.681 vs 0.722）。
-3. 微波炉是最差项（F1 0.152），正样本仅 0.26%，需要更强的类别不平衡策略。
-4. 因此当前不能宣称"改进模型全面更优"。下一步应做：阈值/损失消融、更长训练、focal/BCE 辅助头；若仍无提升，论文应聚焦系统工程贡献并如实讨论。
+1. attention 相对 MSE baseline：平均 Event F1 **0.797 vs 0.789**，平均 MAE **10.45 vs 12.45 W**，**降低 16.1%**，达到 proposal 的 ≥10% 目标。
+2. dilated-only 平均 **0.786**，没有超过 baseline；所以“膨胀卷积本身”不是提升来源，attention 的组合才带来平均增益。
+3. baseline 的 State F1 更高（0.790 vs 0.762）；attention 不是全面更优。微波炉 attention 反而最差（0.407 vs baseline 0.439）。
+4. 损失消融：MSE baseline 0.789 / 12.45，加权 Huber baseline 0.751 / 13.60；MSE attention 0.797 / 10.45，加权 Huber attention 0.779 / 11.42。**本数据集上 MSE 优于加权 Huber**，不能把加权 Huber 当作已证实的改进。
+5. 跨房屋（house1 训练 → house2 测试，44,141 窗口）：attention Event F1 0.797→0.775、MAE 10.45→13.97；baseline Event F1 0.789→0.814、MAE 12.45→15.06。attention 跨房屋 MAE 更低，但 Event F1 低于 baseline，ranking 发生变化。
+6. 微波炉仍是最差项；阈值扫描最好也只有约 0.52，说明是召回问题。下一步：focal/过采样/事件后处理，而不是继续调阈值。
 
 ### 3.2 WHITED 电器识别（第二数据集）
 
@@ -97,7 +99,7 @@ attention 使用加权 Huber（pos_weight=10），baseline 使用 MSE；阈值�
 - 登录、建筑/电表、实时读数、`/meters/{id}/current`
 - 2 小时分解：240 点曲线，**0.18 s**（首次计算）
 - 异步任务：`pending → completed`
-- KPI：mains 216 W，F1 0.681，event F1 0.711，推理 64.5 ms
+- KPI：mains 216 W，State F1 0.762，Event F1 0.797，MAE 10.4 W，推理约 40-70 ms
 - 账单：0.439 kWh / 5 行分项
 - 评测：10 行（5 电器 × 2 模型），13,013 测试窗口
 - 设备用量：/appliances/{id}/usage 返回真实窗口电量

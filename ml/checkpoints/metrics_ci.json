@@ -1,0 +1,632 @@
+[
+  {
+    "appliance": "dishwasher",
+    "model": "attention",
+    "run": "dishwasher_attention",
+    "loss": "weighted_huber",
+    "mae": 8.822400093078613,
+    "mae_ci": {
+      "mean": 8.866369487762451,
+      "low": 6.222180330753327,
+      "high": 12.062172150611875
+    },
+    "rmse": 78.6039810180664,
+    "rmse_ci": {
+      "mean": 77.7183422164917,
+      "low": 55.64715948104858,
+      "high": 100.65770740509032
+    },
+    "event_f1": 0.8421052631578948,
+    "positive_windows": 67,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "dishwasher",
+    "model": "attention",
+    "run": "dishwasher_attention_mse",
+    "loss": "mse",
+    "mae": 6.960700988769531,
+    "mae_ci": {
+      "mean": 7.017519020557404,
+      "low": 4.4686883091926575,
+      "high": 9.781302547454834
+    },
+    "rmse": 67.29460906982422,
+    "rmse_ci": {
+      "mean": 66.66989038848877,
+      "low": 46.14966793060303,
+      "high": 86.9231439590454
+    },
+    "event_f1": 0.8947368421052632,
+    "positive_windows": 67,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "fridge",
+    "model": "attention",
+    "run": "fridge_attention",
+    "loss": "weighted_huber",
+    "mae": 21.81884002685547,
+    "mae_ci": {
+      "mean": 21.848622493743896,
+      "low": 20.810130214691164,
+      "high": 22.916752672195432
+    },
+    "rmse": 32.99935531616211,
+    "rmse_ci": {
+      "mean": 33.03615480804444,
+      "low": 31.288272047042845,
+      "high": 34.82331848144531
+    },
+    "event_f1": 0.8786191536748329,
+    "positive_windows": 6067,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "fridge",
+    "model": "attention",
+    "run": "fridge_attention_mse",
+    "loss": "mse",
+    "mae": 22.697202682495117,
+    "mae_ci": {
+      "mean": 22.726582344055174,
+      "low": 21.722463178634644,
+      "high": 23.7944899559021
+    },
+    "rmse": 32.83254623413086,
+    "rmse_ci": {
+      "mean": 32.87182088088989,
+      "low": 31.2259042263031,
+      "high": 34.633476924896236
+    },
+    "event_f1": 0.8782412626832018,
+    "positive_windows": 6067,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "kettle",
+    "model": "attention",
+    "run": "kettle_attention",
+    "loss": "weighted_huber",
+    "mae": 10.187403678894043,
+    "mae_ci": {
+      "mean": 10.214961711883545,
+      "low": 8.767505669593811,
+      "high": 11.748304986953736
+    },
+    "rmse": 82.94829559326172,
+    "rmse_ci": {
+      "mean": 82.76120219421387,
+      "low": 71.53283443450928,
+      "high": 94.30339183807372
+    },
+    "event_f1": 0.8376068376068375,
+    "positive_windows": 60,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "kettle",
+    "model": "attention",
+    "run": "kettle_attention_mse",
+    "loss": "mse",
+    "mae": 6.982307434082031,
+    "mae_ci": {
+      "mean": 7.013644248962402,
+      "low": 5.671529400348663,
+      "high": 8.528996920585632
+    },
+    "rmse": 82.76947784423828,
+    "rmse_ci": {
+      "mean": 82.62800144195556,
+      "low": 68.48157958984375,
+      "high": 96.13928337097168
+    },
+    "event_f1": 0.859504132231405,
+    "positive_windows": 61,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "microwave",
+    "model": "attention",
+    "run": "microwave_attention",
+    "loss": "weighted_huber",
+    "mae": 7.379565715789795,
+    "mae_ci": {
+      "mean": 7.414214673042298,
+      "low": 5.88210107088089,
+      "high": 9.102454614639282
+    },
+    "rmse": 75.8914794921875,
+    "rmse_ci": {
+      "mean": 75.93023293304444,
+      "low": 62.281562137603764,
+      "high": 90.05598526000976
+    },
+    "event_f1": 0.41584158415841577,
+    "positive_windows": 34,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "microwave",
+    "model": "attention",
+    "run": "microwave_attention_mse",
+    "loss": "mse",
+    "mae": 5.9127302169799805,
+    "mae_ci": {
+      "mean": 5.950491769313812,
+      "low": 4.708184278011322,
+      "high": 7.495640563964844
+    },
+    "rmse": 66.7815170288086,
+    "rmse_ci": {
+      "mean": 66.9257101135254,
+      "low": 52.86100254058838,
+      "high": 82.11036262512206
+    },
+    "event_f1": 0.4067796610169491,
+    "positive_windows": 34,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "washing_machine",
+    "model": "attention",
+    "run": "washing_machine_attention",
+    "loss": "weighted_huber",
+    "mae": 8.875288009643555,
+    "mae_ci": {
+      "mean": 8.884114129066468,
+      "low": 6.005122649669647,
+      "high": 11.561210227012634
+    },
+    "rmse": 61.183250427246094,
+    "rmse_ci": {
+      "mean": 60.85473217010498,
+      "low": 45.457394695281984,
+      "high": 74.07309570312499
+    },
+    "event_f1": 0.9215686274509803,
+    "positive_windows": 134,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "washing_machine",
+    "model": "attention",
+    "run": "washing_machine_attention_mse",
+    "loss": "mse",
+    "mae": 9.688812255859375,
+    "mae_ci": {
+      "mean": 9.68012414264679,
+      "low": 6.714339458942414,
+      "high": 12.626039505004883
+    },
+    "rmse": 61.58831024169922,
+    "rmse_ci": {
+      "mean": 61.14209786224365,
+      "low": 47.73956642150879,
+      "high": 73.81665267944335
+    },
+    "event_f1": 0.9433962264150944,
+    "positive_windows": 134,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "dishwasher",
+    "model": "baseline",
+    "run": "dishwasher_baseline",
+    "loss": "weighted_huber",
+    "mae": 17.403934478759766,
+    "mae_ci": {
+      "mean": 17.453781593322756,
+      "low": 15.08864517211914,
+      "high": 19.990239334106445
+    },
+    "rmse": 68.27706909179688,
+    "rmse_ci": {
+      "mean": 67.60892797088623,
+      "low": 49.13156261444092,
+      "high": 86.4124797821045
+    },
+    "event_f1": 0.8095238095238096,
+    "positive_windows": 67,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "dishwasher",
+    "model": "baseline",
+    "run": "dishwasher_baseline_mse",
+    "loss": "mse",
+    "mae": 12.340352058410645,
+    "mae_ci": {
+      "mean": 12.41528818321228,
+      "low": 9.973897814750671,
+      "high": 15.212277603149413
+    },
+    "rmse": 66.28646850585938,
+    "rmse_ci": {
+      "mean": 65.92912395477295,
+      "low": 48.08747777938843,
+      "high": 83.36243953704833
+    },
+    "event_f1": 0.8717948717948718,
+    "positive_windows": 67,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "fridge",
+    "model": "baseline",
+    "run": "fridge_baseline",
+    "loss": "weighted_huber",
+    "mae": 21.337068557739258,
+    "mae_ci": {
+      "mean": 21.333754707336425,
+      "low": 20.16477851867676,
+      "high": 22.54977126121521
+    },
+    "rmse": 34.237823486328125,
+    "rmse_ci": {
+      "mean": 34.20278593826294,
+      "low": 32.30337142944336,
+      "high": 36.08171157836914
+    },
+    "event_f1": 0.8910776361529548,
+    "positive_windows": 6067,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "fridge",
+    "model": "baseline",
+    "run": "fridge_baseline_mse",
+    "loss": "mse",
+    "mae": 22.609840393066406,
+    "mae_ci": {
+      "mean": 22.609374897003175,
+      "low": 21.469716691970824,
+      "high": 23.757419776916503
+    },
+    "rmse": 34.348548889160156,
+    "rmse_ci": {
+      "mean": 34.327168323516844,
+      "low": 32.582093334198,
+      "high": 36.11835594177246
+    },
+    "event_f1": 0.9013398294762485,
+    "positive_windows": 6067,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "kettle",
+    "model": "baseline",
+    "run": "kettle_baseline",
+    "loss": "weighted_huber",
+    "mae": 10.683426856994629,
+    "mae_ci": {
+      "mean": 10.712329641342164,
+      "low": 9.055722880363465,
+      "high": 12.43144633769989
+    },
+    "rmse": 82.336669921875,
+    "rmse_ci": {
+      "mean": 82.28948985290528,
+      "low": 72.68575057983398,
+      "high": 91.4194149017334
+    },
+    "event_f1": 0.7741935483870968,
+    "positive_windows": 58,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "kettle",
+    "model": "baseline",
+    "run": "kettle_baseline_mse",
+    "loss": "mse",
+    "mae": 8.029136657714844,
+    "mae_ci": {
+      "mean": 8.058517973899841,
+      "low": 6.641286945343017,
+      "high": 9.578834533691404
+    },
+    "rmse": 87.8171615600586,
+    "rmse_ci": {
+      "mean": 87.59676808166503,
+      "low": 73.62674655914307,
+      "high": 101.85444202423096
+    },
+    "event_f1": 0.8518518518518519,
+    "positive_windows": 61,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "microwave",
+    "model": "baseline",
+    "run": "microwave_baseline",
+    "loss": "weighted_huber",
+    "mae": 10.414671897888184,
+    "mae_ci": {
+      "mean": 10.460924709320068,
+      "low": 8.60000422000885,
+      "high": 12.407001066207885
+    },
+    "rmse": 83.0018539428711,
+    "rmse_ci": {
+      "mean": 83.13103582763672,
+      "low": 69.76354293823242,
+      "high": 96.4071729660034
+    },
+    "event_f1": 0.3561643835616438,
+    "positive_windows": 28,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "microwave",
+    "model": "baseline",
+    "run": "microwave_baseline_mse",
+    "loss": "mse",
+    "mae": 7.954161167144775,
+    "mae_ci": {
+      "mean": 7.988481399536133,
+      "low": 6.460860395431519,
+      "high": 9.670882391929625
+    },
+    "rmse": 69.08197784423828,
+    "rmse_ci": {
+      "mean": 69.1837358932495,
+      "low": 56.60201187133789,
+      "high": 82.23464736938476
+    },
+    "event_f1": 0.43902439024390244,
+    "positive_windows": 34,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "washing_machine",
+    "model": "baseline",
+    "run": "washing_machine_baseline",
+    "loss": "weighted_huber",
+    "mae": 8.139938354492188,
+    "mae_ci": {
+      "mean": 8.130687036514281,
+      "low": 5.565004694461822,
+      "high": 10.77643826007843
+    },
+    "rmse": 53.6119499206543,
+    "rmse_ci": {
+      "mean": 53.182241668701174,
+      "low": 40.63757238388062,
+      "high": 65.69443740844727
+    },
+    "event_f1": 0.9245283018867925,
+    "positive_windows": 134,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "washing_machine",
+    "model": "baseline",
+    "run": "washing_machine_baseline_mse",
+    "loss": "mse",
+    "mae": 11.320175170898438,
+    "mae_ci": {
+      "mean": 11.29947085571289,
+      "low": 8.667218780517578,
+      "high": 14.097144389152525
+    },
+    "rmse": 57.087257385253906,
+    "rmse_ci": {
+      "mean": 56.5687027130127,
+      "low": 43.25321683883667,
+      "high": 69.69783058166503
+    },
+    "event_f1": 0.8807339449541284,
+    "positive_windows": 134,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "dishwasher",
+    "model": "dilated",
+    "run": "dishwasher_dilated",
+    "loss": "weighted_huber",
+    "mae": 8.31108283996582,
+    "mae_ci": {
+      "mean": 8.350006152153016,
+      "low": 5.871906900405884,
+      "high": 11.373202157020566
+    },
+    "rmse": 73.88084411621094,
+    "rmse_ci": {
+      "mean": 72.96328453063965,
+      "low": 51.552542495727536,
+      "high": 95.09807834625244
+    },
+    "event_f1": 0.7333333333333334,
+    "positive_windows": 67,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "dishwasher",
+    "model": "dilated",
+    "run": "dishwasher_dilated_mse",
+    "loss": "mse",
+    "mae": 7.022500991821289,
+    "mae_ci": {
+      "mean": 7.100024008750916,
+      "low": 4.441249108314514,
+      "high": 10.06128032207489
+    },
+    "rmse": 70.77507781982422,
+    "rmse_ci": {
+      "mean": 70.26371594238282,
+      "low": 49.74824991226196,
+      "high": 89.67838153839111
+    },
+    "event_f1": 0.8571428571428571,
+    "positive_windows": 67,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "fridge",
+    "model": "dilated",
+    "run": "fridge_dilated",
+    "loss": "weighted_huber",
+    "mae": 22.391212463378906,
+    "mae_ci": {
+      "mean": 22.38366925430298,
+      "low": 21.234522676467897,
+      "high": 23.555129718780517
+    },
+    "rmse": 35.24180221557617,
+    "rmse_ci": {
+      "mean": 35.21902088165283,
+      "low": 33.349393653869626,
+      "high": 37.04584894180298
+    },
+    "event_f1": 0.896788990825688,
+    "positive_windows": 6067,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "fridge",
+    "model": "dilated",
+    "run": "fridge_dilated_mse",
+    "loss": "mse",
+    "mae": 24.091129302978516,
+    "mae_ci": {
+      "mean": 24.085768669128417,
+      "low": 22.944823932647704,
+      "high": 25.17848711013794
+    },
+    "rmse": 34.947418212890625,
+    "rmse_ci": {
+      "mean": 34.926921531677245,
+      "low": 33.17851686477661,
+      "high": 36.69389762878418
+    },
+    "event_f1": 0.8902077151335313,
+    "positive_windows": 6067,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "kettle",
+    "model": "dilated",
+    "run": "kettle_dilated",
+    "loss": "weighted_huber",
+    "mae": 14.952842712402344,
+    "mae_ci": {
+      "mean": 14.992132614135743,
+      "low": 13.242860865592956,
+      "high": 16.76777319908142
+    },
+    "rmse": 86.16602325439453,
+    "rmse_ci": {
+      "mean": 86.18958494567872,
+      "low": 76.49405555725097,
+      "high": 95.59710998535157
+    },
+    "event_f1": 0.8440366972477065,
+    "positive_windows": 58,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "kettle",
+    "model": "dilated",
+    "run": "kettle_dilated_mse",
+    "loss": "mse",
+    "mae": 10.412215232849121,
+    "mae_ci": {
+      "mean": 10.445401782989501,
+      "low": 9.096555614471436,
+      "high": 11.908116507530211
+    },
+    "rmse": 81.1722640991211,
+    "rmse_ci": {
+      "mean": 81.16103750610351,
+      "low": 68.21685733795167,
+      "high": 93.29023513793945
+    },
+    "event_f1": 0.8524590163934426,
+    "positive_windows": 61,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "microwave",
+    "model": "dilated",
+    "run": "microwave_dilated",
+    "loss": "weighted_huber",
+    "mae": 11.135193824768066,
+    "mae_ci": {
+      "mean": 11.196807739257812,
+      "low": 9.424574041366578,
+      "high": 13.154289197921752
+    },
+    "rmse": 82.36480712890625,
+    "rmse_ci": {
+      "mean": 82.52311146545411,
+      "low": 70.95314521789551,
+      "high": 94.4741439819336
+    },
+    "event_f1": 0.35443037974683544,
+    "positive_windows": 28,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "microwave",
+    "model": "dilated",
+    "run": "microwave_dilated_mse",
+    "loss": "mse",
+    "mae": 7.360235691070557,
+    "mae_ci": {
+      "mean": 7.417773036003113,
+      "low": 5.96964989900589,
+      "high": 9.106031274795532
+    },
+    "rmse": 69.4322509765625,
+    "rmse_ci": {
+      "mean": 69.6426346282959,
+      "low": 55.29672994613647,
+      "high": 85.35253162384033
+    },
+    "event_f1": 0.456140350877193,
+    "positive_windows": 34,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "washing_machine",
+    "model": "dilated",
+    "run": "washing_machine_dilated",
+    "loss": "weighted_huber",
+    "mae": 12.87689208984375,
+    "mae_ci": {
+      "mean": 12.863798412322998,
+      "low": 9.885772633552552,
+      "high": 15.81654269695282
+    },
+    "rmse": 63.682437896728516,
+    "rmse_ci": {
+      "mean": 63.12469596099854,
+      "low": 47.573141956329344,
+      "high": 77.78656406402587
+    },
+    "event_f1": 0.9056603773584905,
+    "positive_windows": 134,
+    "n_windows": 13013
+  },
+  {
+    "appliance": "washing_machine",
+    "model": "dilated",
+    "run": "washing_machine_dilated_mse",
+    "loss": "mse",
+    "mae": 16.046104431152344,
+    "mae_ci": {
+      "mean": 16.02513563346863,
+      "low": 13.070958805084228,
+      "high": 19.026573371887206
+    },
+    "rmse": 64.20460510253906,
+    "rmse_ci": {
+      "mean": 63.69412479400635,
+      "low": 49.10551109313965,
+      "high": 77.18066959381103
+    },
+    "event_f1": 0.8727272727272728,
+    "positive_windows": 134,
+    "n_windows": 13013
+  }
+]

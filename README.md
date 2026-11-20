@@ -12,7 +12,7 @@ real UK-DALE house 1 data through ONNX Runtime.
   at 6 s resolution, 5 appliances (fridge, kettle, microwave, dishwasher,
   washing machine).
 - **Trained models**: Seq2Point attention (9.8 M params) and baseline
-  (30.7 M params), 3 epochs on an RTX 3070, exported to ONNX with numerical
+  (30.7 M params), 8 epochs with MSE on an RTX 3070, exported to ONNX with numerical
   parity checks.
 - **Evidence-based metrics**: every number on the Evaluation page comes from
   `ml/checkpoints/ablation_metrics.json` (13,013 test windows per appliance).
@@ -92,20 +92,24 @@ samples on first start. `GET /readyz` reports the inference backend
 
 ## Results (UK-DALE house 1, test split)
 
-| Appliance | Attention MAE | SAE | State F1 | Event F1 | Baseline MAE | State F1 |
-|-----------|--------------:|----:|---------:|---------:|-------------:|---------:|
-| fridge | 21.31 W | 0.006 | 0.781 | 0.861 | 20.53 W | 0.784 |
-| kettle | 9.21 W | 0.153 | 0.744 | 0.755 | 8.14 W | 0.821 |
-| microwave | 6.76 W | 0.345 | 0.152 | 0.288 | 7.08 W | 0.329 |
-| dishwasher | 8.72 W | 0.105 | 0.845 | 0.810 | 9.53 W | 0.724 |
-| washing machine | 11.15 W | 0.013 | 0.884 | 0.840 | 13.38 W | 0.952 |
-| **mean** | — | — | **0.681** | **0.711** | — | **0.722** |
+Three-model ablation with the **same MSE loss, 8 epochs and seed 42** (13,013 test windows per appliance):
 
-Honest reading: attention wins clearly on dishwasher and washing machine
-(especially SAE), but baseline is still better on kettle and microwave, and
-slightly better on mean state F1. The current "proposed vs baseline" story is
-therefore **not yet a win**; see `IMPROVEMENT_PLAN.md` (threshold search,
-positive weighting, longer schedules) and `MIDTERM_STATUS.md`.
+| Model | MAE | RMSE | State F1 | Event F1 |
+|---|---:|---:|---:|---:|
+| Baseline CNN | 12.45 W | 62.9 W | 0.790 | 0.789 |
+| Dilated only | 12.99 W | 64.1 W | 0.733 | 0.786 |
+| Attention (proposed) | **10.45 W** | **62.3 W** | 0.762 | **0.797** |
+
+Honest reading: attention lowers mean MAE by **16.1% vs the MSE baseline**
+(proposal target ≥10%: met) and slightly improves Event F1 (0.797 vs 0.789).
+Dilation alone does **not** improve the average; baseline still has higher
+State F1 (0.790 vs 0.762). Microwave remains weak (Event F1 0.407).
+
+The 2×2 loss ablation (MSE vs weighted Huber) and the house-1 → house-2
+cross-house test are in [MODEL_EVIDENCE.md](MODEL_EVIDENCE.md). Key result:
+MSE is stronger than weighted Huber at 8 epochs; cross-house Event F1 is
+0.775 for attention and 0.814 for baseline, while attention has the lower
+cross-house MAE (13.97 vs 15.06 W).
 
 ## Layout
 

@@ -27,6 +27,8 @@ def _normalize(row: dict) -> dict:
     return {
         "appliance": row.get("appliance", ""),
         "model": row.get("model", ""),
+        "run": row.get("run", ""),
+        "loss": row.get("loss", "weighted_huber"),
         "split": row.get("split", "test"),
         "samples": int(row.get("samples", 0) or 0),
         "mae": float(row.get("mae", 0.0) or 0.0),
@@ -43,12 +45,27 @@ def _normalize(row: dict) -> dict:
     }
 
 
+def _canonical_rows() -> list[dict]:
+    """One row per appliance/model: prefer MSE when it exists.
+
+    ``ablation_metrics.json`` contains both the loss ablation and the main
+    models. The API should expose one comparable configuration per model, not
+    silently average MSE and Huber rows together.
+    """
+    rows = [_normalize(r) for r in _rows()]
+    selected = {}
+    for model in {r["model"] for r in rows}:
+        model_rows = [r for r in rows if r["model"] == model]
+        selected[model] = "mse" if any(r["loss"] == "mse" for r in model_rows) else "weighted_huber"
+    return [r for r in rows if r["loss"] == selected.get(r["model"])]
+
+
 def all_rows() -> list[dict]:
     return [_normalize(r) for r in _rows()]
 
 
 def rows_for_model(model: str) -> list[dict]:
-    return [r for r in all_rows() if r["model"] == model]
+    return [r for r in _canonical_rows() if r["model"] == model]
 
 
 def average(model: str) -> dict:
@@ -64,10 +81,11 @@ def model_names() -> list[str]:
 
 
 def as_summary() -> dict:
+    rows = _canonical_rows()
     models = model_names()
     return {
         "models": models,
         "averages": {m: average(m) for m in models},
-        "rows": all_rows(),
-        "samples": max((r["samples"] for r in all_rows()), default=0),
+        "rows": rows,
+        "samples": max((r["samples"] for r in rows), default=0),
     }
