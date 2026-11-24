@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from PIL import Image
@@ -15,7 +16,7 @@ ROOT = Path(r"C:\Users\Wizard\Desktop\ComputerScience\毕业设计")
 BASE = Path(__file__).resolve().parent
 FIGS = BASE / "figs"
 SHOTS = BASE / "shots"
-OUT = ROOT / "NILM-pre11.11.pptx"
+OUT = ROOT / "NILM-pre11.25.pptx"
 
 FONT = "Corbel"
 TEAL = RGBColor(0x40, 0xBA, 0xD2)
@@ -36,10 +37,27 @@ PALE_RED = RGBColor(0xFD, 0xEC, 0xEC)
 PALE_GREEN = RGBColor(0xE8, 0xF8, 0xF2)
 
 TOTAL = 15
+_footer_page = 0
 
 
 def rgb(hex_value: str) -> RGBColor:
     return RGBColor.from_string(hex_value)
+
+
+def add_footer(slide, page=None):
+    global _footer_page
+    _footer_page += 1
+    add_text(
+        slide,
+        f"NILM progress report  ·  25 Nov 2026  ·  {_footer_page:02d}",
+        8.4,
+        7.12,
+        4.4,
+        0.22,
+        8,
+        MUTED,
+        align=PP_ALIGN.RIGHT,
+    )
 
 
 def add_rect(
@@ -147,20 +165,6 @@ def add_header(slide, kicker, title, subtitle=None):
         add_text(slide, subtitle, 4.57, 1.42, 8.1, 0.35, 11.5, MUTED)
 
 
-def add_footer(slide, page):
-    add_text(
-        slide,
-        f"NILM progress report  ·  11 Nov 2026  ·  {page:02d}",
-        8.4,
-        7.12,
-        4.4,
-        0.22,
-        8,
-        MUTED,
-        align=PP_ALIGN.RIGHT,
-    )
-
-
 def add_callout(slide, text, x, y, w, h, fill=LIGHT, color=NAVY, size=12, bold=False):
     add_rect(slide, x, y, w, h, fill, BORDER, radius=0.12)
     add_text(slide, text, x + 0.25, y, w - 0.5, h, size, color, bold, anchor=MSO_ANCHOR.MIDDLE)
@@ -183,11 +187,34 @@ def build() -> None:
     prs.core_properties.title = "Building-Level NILM System - Progress Report"
     prs.core_properties.author = "JinXinyi, YangYifei, YuShengbin"
 
+    metrics_rows = json.loads(
+        (BASE.parent / "ml/checkpoints/ablation_metrics.json").read_text(encoding="utf-8")
+    )
+
+    def metric(appliance: str, model: str, key: str) -> float:
+        return float(
+            next(
+                r[key]
+                for r in metrics_rows
+                if r["appliance"] == appliance
+                and r["model"] == model
+                and r.get("loss") == "mse"
+            )
+        )
+
+    def mean_metric(model: str, key: str) -> float:
+        values = [
+            r[key]
+            for r in metrics_rows
+            if r["model"] == model and r.get("loss") == "mse"
+        ]
+        return float(sum(values) / len(values))
+
     # 1 — Title
     slide = blank(prs)
     add_rect(slide, 0, 0.72, 8.45, 6.05, TEAL, radius=0, shape=MSO_SHAPE.RECTANGLE)
     add_rect(slide, 8.95, 0.72, 3.85, 6.05, GREY_BG, radius=0, shape=MSO_SHAPE.RECTANGLE)
-    add_text(slide, "BI-WEEKLY REPORT  ·  11 NOV 2026", 0.78, 1.18, 6.8, 0.3, 10, WHITE, True, spacing=120)
+    add_text(slide, "BI-WEEKLY REPORT  ·  25 NOV 2026", 0.78, 1.18, 6.8, 0.3, 10, WHITE, True, spacing=120)
     add_text(slide, "Building-Level\nNILM System", 0.78, 1.72, 7.1, 1.9, 38, WHITE, True, line_spacing=0.92)
     add_text(slide, "Two-Week Progress Report", 0.80, 3.78, 6.8, 0.4, 19, WHITE)
     add_text(slide, "JinXinyi   ·   YangYifei   ·   YuShengbin", 0.80, 4.48, 6.8, 0.3, 13, WHITE)
@@ -335,67 +362,171 @@ def build() -> None:
         add_stat(slide, number, label, 4.55 + index * 2.70, 6.05, 2.55, 0.78, number_size=15)
     add_footer(slide, 4)
 
-    # 5 — Model
+    # 5 — Class imbalance
     slide = blank(prs)
-    add_section(slide, "04", "Model", "HOW IT LEARNS")
+    add_section(slide, "03", "Data", "WHO IS RARE?")
     add_header(
         slide,
-        "SEQ2POINT  ·  ONE MODEL PER APPLIANCE",
-        "How the model learns",
-        "599 readings in; one appliance power value out.",
+        "CLASS BALANCE  ·  SIX MONTHS",
+        "The microwave is barely there",
+        "Share of time ON; positive windows in the 13,013-window test split.",
     )
-    pipeline = [
-        ("599 samples", "one hour"),
-        ("1-D CNN", "+ attention"),
-        ("Appliance watts", "one value"),
-        ("ON/OFF + kWh", "what users see"),
-    ]
-    for index, (top, bottom) in enumerate(pipeline):
-        x = 4.55 + index * 2.03
-        add_rect(slide, x, 1.78, 1.72, 0.66, LIGHT, BORDER, radius=0.12)
-        add_text(slide, top, x + 0.12, 1.83, 1.48, 0.24, 9.8, NAVY, True, align=PP_ALIGN.CENTER)
-        add_text(slide, bottom, x + 0.12, 2.07, 1.48, 0.22, 8.2, MUTED, align=PP_ALIGN.CENTER)
-        if index < 3:
-            add_rect(slide, x + 1.76, 2.03, 0.22, 0.16, BORDER, radius=0.2, shape=MSO_SHAPE.RIGHT_ARROW)
-    add_figure(slide, FIGS / "fig_training.png", 4.55, 2.72, 7.55, 2.85)
+    add_figure(slide, FIGS / "fig_imbalance.png", 4.55, 1.76, 8.08, 3.20)
+    for index, (number, label) in enumerate(
+        [("0.39%", "microwave ON"), ("34", "positive test windows"), ("17 h", "ON in six months")]
+    ):
+        add_stat(slide, number, label, 4.55 + index * 2.70, 5.08, 2.55, 0.78, number_size=20)
+    add_callout(
+        slide,
+        "A model that always predicts OFF is right 99.6% of the time. That is why we report F1, not accuracy.",
+        4.55,
+        6.02,
+        8.10,
+        0.82,
+        fill=PALE_RED,
+        color=RGBColor(0x99, 0x1B, 0x1B),
+        size=11.5,
+        bold=True,
+    )
+    add_footer(slide, 5)
+
+    # 6 — Training curves
+    slide = blank(prs)
+    add_section(slide, "04", "Model", "ALL EPOCHS")
+    add_header(
+        slide,
+        "TRAINING  ·  EVERY EPOCH",
+        "Train loss falls. Validation flattens.",
+        "Five appliances; attention model; validation loss computed every epoch.",
+    )
+    add_figure(slide, FIGS / "fig_training_all.png", 4.55, 1.76, 8.08, 3.82)
     add_text(
         slide,
-        "3 epochs  ·  60,797 training windows per appliance  ·  RTX 3070",
+        "Per-epoch values, not a smoothed summary. The final ON threshold is calibrated on validation, never on test.",
         4.55,
         5.68,
-        7.6,
-        0.25,
-        9,
+        8.10,
+        0.28,
+        8.7,
         MUTED,
     )
     add_callout(
         slide,
-        "The same 1-hour window feeds five separate models; each one specialises in a single appliance.",
+        "Training loss keeps falling; validation loss stops improving after the first few epochs on several appliances. Early stopping is the next step.",
         4.55,
-        6.05,
+        6.02,
         8.10,
-        0.72,
+        0.82,
         size=11.5,
     )
-    add_footer(slide, 5)
+    add_footer(slide, 6)
 
-    # 6 — Results
+    # 7 — Model architectures
     slide = blank(prs)
+    add_section(slide, "04", "Model", "INSIDE")
+    add_header(
+        slide,
+        "BASELINE VS ATTENTION",
+        "Inside the model",
+        "Same 599-sample input and one output; different ways to focus on the signal.",
+    )
+
+    def params_of(model_name: str) -> int:
+        path = BASE.parent / f"ml/checkpoints/fridge_{model_name}.json"
+        try:
+            return int(json.loads(path.read_text(encoding="utf-8")).get("params", 0))
+        except Exception:
+            return 0
+
+    def arch_box(x, y, w, text, fill=LIGHT, border=BORDER, size=8.8, color=NAVY):
+        add_rect(slide, x, y, w, 0.46, fill, border, radius=0.1)
+        add_text(slide, text, x + 0.10, y, w - 0.20, 0.46, size, color, True, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+
+    def down_arrow(x, y):
+        add_rect(slide, x, y, 0.16, 0.09, BORDER, radius=0.2, shape=MSO_SHAPE.DOWN_ARROW)
+
+    left_x, right_x = 4.55, 8.62
+    col_w = 3.70
+    add_text(slide, "Baseline CNN", left_x, 1.62, col_w, 0.28, 14, NAVY, True)
+    add_text(slide, f"{params_of('baseline')/1e6:.1f}M params", left_x, 1.90, col_w, 0.22, 8.5, MUTED)
+    add_text(slide, "Attention (proposed)", right_x, 1.62, col_w, 0.28, 14, TEAL_DARK, True)
+    add_text(slide, f"{params_of('attention')/1e6:.1f}M params", right_x, 1.90, col_w, 0.22, 8.5, MUTED)
+
+    baseline = [
+        "Input  ·  (1 × 599)",
+        "5 × Conv1D  ·  k=5, 30→50 filters",
+        "Flatten  ·  50 × 599 → FC 1024",
+        "Output  ·  one power value",
+    ]
+    for index, text in enumerate(baseline):
+        y = 2.22 + index * 0.72
+        arch_box(left_x, y, col_w, text)
+        if index < len(baseline) - 1:
+            down_arrow(left_x + col_w / 2 - 0.08, y + 0.48)
+    add_text(slide, "Standard Seq2Point baseline", left_x, 5.02, col_w, 0.25, 9, MUTED)
+
+    attention = [
+        "Input  ·  (1 × 599)",
+        "Stem Conv1D  ·  k=5, 32 filters",
+        "4 × DilatedBlock  ·  k=5, d=1/2/4/8",
+        "Channel attention  ·  32→8→32",
+        "Temporal attention  ·  Conv1d k=1 → softmax",
+        "FC 512  →  output 1",
+        "Output  ·  one power value",
+    ]
+    for index, text in enumerate(attention):
+        y = 2.22 + index * 0.55
+        arch_box(
+            right_x,
+            y,
+            col_w,
+            text,
+            fill=PALE_GREEN,
+            border=RGBColor(0x9A, 0xD8, 0xCE),
+            color=TEAL_DARK,
+            size=8.6,
+        )
+        if index < len(attention) - 1:
+            down_arrow(right_x + col_w / 2 - 0.08, y + 0.48)
+
+    add_callout(
+        slide,
+        f"Same input, output and loss; attention is smaller ({params_of('attention')/1e6:.1f}M vs {params_of('baseline')/1e6:.1f}M) and learns which channels and time regions matter.",
+        4.55,
+        6.30,
+        8.10,
+        0.60,
+        size=10.5,
+        bold=False,
+    )
+    add_footer(slide, 7)
+
+    # 8 — Results
+    slide = blank(prs)
+    att_event = mean_metric("attention", "event_f1")
+    base_event = mean_metric("baseline", "event_f1")
+    dil_event = mean_metric("dilated", "event_f1")
+    att_state = mean_metric("attention", "state_f1")
+    att_mae = mean_metric("attention", "mae")
     add_section(slide, "05", "Results", "DOES IT WORK?")
     add_header(
         slide,
         "TEST SET  ·  13,013 WINDOWS PER APPLIANCE",
         "Good on four. Weak on one.",
-        "Event F1 = how often ON/OFF events are correct. Average 0.71; the baseline CNN is 0.76.",
+        f"Event F1: attention {att_event:.2f}, baseline {base_event:.2f}, dilated {dil_event:.2f}.",
     )
     add_figure(slide, FIGS / "fig_metrics.png", 4.55, 1.72, 8.08, 3.95)
     for index, (number, label) in enumerate(
-        [("0.71", "average event F1"), ("0.68", "average state F1"), ("11.4 W", "average MAE")]
+        [
+            (f"{att_event:.2f}", "average event F1"),
+            (f"{att_state:.2f}", "average state F1"),
+            (f"{att_mae:.1f} W", "average MAE"),
+        ]
     ):
         add_stat(slide, number, label, 4.55 + index * 2.70, 5.85, 2.55, 0.72, number_size=19)
     add_text(
         slide,
-        "Attention wins on dishwasher and washing machine; baseline still wins on fridge, kettle and microwave.",
+        "Dilation alone is not enough; attention gains event F1 and MAE, while baseline still wins state F1.",
         4.55,
         6.66,
         8.1,
@@ -403,28 +534,73 @@ def build() -> None:
         8.5,
         MUTED,
     )
-    add_footer(slide, 6)
+    add_footer(slide, 8)
 
-    # 7 — Disaggregation example
+    # 9 — Threshold curves
+    slide = blank(prs)
+    add_section(slide, "05", "Results", "WHY MICROWAVE?")
+    add_header(
+        slide,
+        "CLASS IMBALANCE  ·  THRESHOLD SWEEP",
+        "Even the best threshold cannot fix recall.",
+        "Microwave: 0.39% ON, 34 positive test windows, 17 h in six months.",
+    )
+    add_figure(slide, FIGS / "fig_threshold.png", 4.55, 1.76, 8.08, 3.90)
+    add_callout(
+        slide,
+        "Threshold alone cannot fix recall. A 25× positive-weighted MSE lifts microwave Event F1 0.407→0.494 (recall 0.68, precision flat), with slightly higher MAE; next is event-level post-processing.",
+        4.55,
+        5.82,
+        8.10,
+        0.95,
+        size=11,
+    )
+    add_footer(slide, 9)
+
+    # 10 — Disaggregation estimates
     slide = blank(prs)
     add_section(slide, "05", "Results", "ONE WINDOW")
     add_header(
         slide,
         "TWO-HOUR EXAMPLE",
-        "One signal in. Five signals out.",
-        "Measured mains (navy) versus model estimates (colours).",
+        "One signal in. Five estimates out.",
+        "Measured mains (navy) versus model estimates (colours); estimates, not truth.",
     )
     add_figure(slide, FIGS / "fig_disagg.png", 4.55, 1.72, 8.08, 3.95)
     add_callout(
         slide,
-        "The kettle and dishwasher events are recovered from the total; fridge cycles remain visible as a low baseline.",
+        "The model tracks some events, but not all. The next slide compares the estimates with measured appliance power.",
         4.55,
         5.85,
         8.10,
         0.82,
         size=11.5,
     )
-    add_footer(slide, 7)
+    add_footer(slide, 10)
+
+    # 11 — Failure case
+    slide = blank(prs)
+    add_section(slide, "05", "Results", "ERROR ANALYSIS")
+    add_header(
+        slide,
+        "THE RED CIRCLES, EXPLAINED",
+        "Where the estimates fail",
+        "Same window: total power is high while the model output is near zero.",
+    )
+    add_figure(slide, FIGS / "fig_failure.png", 4.55, 1.76, 8.08, 3.88)
+    add_callout(
+        slide,
+        "90-120 min: dishwasher truth ~1.1 kW, model output far below. Average residual is only 174 W, so this is a recall failure, not an unmodeled appliance.",
+        4.55,
+        5.70,
+        8.10,
+        0.98,
+        fill=PALE_RED,
+        color=RGBColor(0x99, 0x1B, 0x1B),
+        size=10.8,
+        bold=True,
+    )
+    add_footer(slide, 11)
 
     # 8 — WHITED concept
     slide = blank(prs)
@@ -478,7 +654,92 @@ def build() -> None:
     add_text(slide, "This is a baseline, not a final result; a raw-waveform CNN is next.", 4.57, 6.72, 8.0, 0.22, 8.5, MUTED)
     add_footer(slide, 9)
 
-    # 10 — Architecture
+    # 10 — WHITED class distribution + classifier
+    slide = blank(prs)
+    add_section(slide, "06", "Second dataset", "40 CLASSES")
+    add_header(
+        slide,
+        "CLASS DISTRIBUTION  ·  RF BASELINE",
+        "A long tail of start-ups",
+        "18 classes are evaluable; 22 have only one device and stay train-only.",
+    )
+    add_figure(slide, FIGS / "fig_whited_classes.png", 4.55, 1.70, 4.25, 4.60)
+    rf_steps = [
+        "FLAC current channel  ·  44.1 kHz",
+        "120 ms switch-on window",
+        "19 time-frequency features",
+        "Random Forest  ·  400 trees",
+        "Class + top-3 prediction",
+    ]
+    for index, text in enumerate(rf_steps):
+        y = 1.82 + index * 0.78
+        add_rect(slide, 9.10, y, 3.55, 0.50, LIGHT, BORDER, radius=0.1)
+        add_text(slide, text, 9.22, y, 3.30, 0.50, 9.2, NAVY, True, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+        if index < len(rf_steps) - 1:
+            add_rect(slide, 10.78, y + 0.51, 0.18, 0.10, BORDER, radius=0.2, shape=MSO_SHAPE.DOWN_ARROW)
+    add_callout(
+        slide,
+        "The long tail explains the 44.1% accuracy: 22 classes have only one device, so they cannot appear in the test set at all.",
+        9.10,
+        5.80,
+        3.55,
+        1.05,
+        size=9.5,
+    )
+    add_text(slide, "This is the baseline classifier; a raw-waveform CNN is next.", 4.57, 6.45, 8.0, 0.22, 8.5, MUTED)
+    add_footer(slide, 10)
+
+    # 11 — Why the numbers are what they are
+    slide = blank(prs)
+    add_section(slide, "06", "Second dataset", "WHY?")
+    add_header(
+        slide,
+        "CROSS-CHECK  ·  BOTH DATASETS",
+        "Why the numbers are what they are",
+        "Two datasets, two different reasons; neither is a clean win.",
+    )
+    cards = [
+        (
+            4.55,
+            "UK-DALE  ·  house 1 → house 2",
+            [
+                "Attention wins MAE (−16.1%) and Event F1 (+0.008), but baseline wins State F1 (0.790 vs 0.762).",
+                "Cross-house ranking flips: baseline 0.814 vs attention 0.775 Event F1.",
+                "So: do not claim a universal 'better model'; report the trade-off.",
+            ],
+            RED,
+        ),
+        (
+            8.65,
+            "WHITED  ·  20 unseen devices",
+            [
+                "44.1% top-1, 71.8% top-3; 18 of 40 classes are evaluable.",
+                "22 classes have only one device, so they cannot appear in the test set.",
+                "Confusions are physical: coffee machine/iron → kettle; laptop/monitor → game console.",
+            ],
+            TEAL_DARK,
+        ),
+    ]
+    for x, title, bullets, accent in cards:
+        add_rect(slide, x, 1.72, 3.72, 4.15, LIGHT, BORDER, radius=0.06)
+        add_text(slide, title, x + 0.20, 1.90, 3.32, 0.30, 11.5, accent, True)
+        for index, bullet in enumerate(bullets):
+            add_text(slide, "•  " + bullet, x + 0.20, 2.38 + index * 1.02, 3.30, 0.90, 9.3, BODY)
+    add_callout(
+        slide,
+        "What would change the conclusion: focal/oversampling for microwave, a cross-dataset test, and a full 3-seed repeat.",
+        4.55,
+        6.10,
+        7.82,
+        0.72,
+        fill=PALE_RED,
+        color=RGBColor(0x99, 0x1B, 0x1B),
+        size=10.5,
+        bold=True,
+    )
+    add_footer(slide, 11)
+
+    # 12 — Architecture
     slide = blank(prs)
     add_section(slide, "07", "System", "FIVE LAYERS")
     add_header(
@@ -525,10 +786,12 @@ def build() -> None:
         "The console shows it live",
         "Dashboard  ·  Evaluation  ·  Analytics",
     )
+    add_rect(slide, 10.78, 1.40, 1.28, 0.28, ORANGE, radius=0.2)
+    add_text(slide, "LIVE DEMO", 10.78, 1.44, 1.28, 0.20, 7.5, WHITE, True, align=PP_ALIGN.CENTER, spacing=60)
     add_figure(slide, SHOTS / "web_dashboard_tall.png", 4.55, 1.68, 7.55, 4.95, pad=0.04)
     add_text(
         slide,
-        "Live mains and five appliance cards.  Model F1, energy and alerts update from the same API.",
+        "Demo path: Login · Refresh · Evaluation · Analytics. Same API, live data.",
         4.57,
         6.68,
         8.0,
@@ -587,65 +850,47 @@ def build() -> None:
     )
     add_footer(slide, 12)
 
-    # 13 — Status
+    # 13 — Why accuracy is not proven
     slide = blank(prs)
-    add_section(slide, "08", "Status", "HONEST VIEW")
+    add_section(slide, "08", "Limits", "WHY NOT PROVEN?")
     add_header(
         slide,
-        "WHAT IS PROVEN?",
-        "Real vs still open",
-        "We separate working software from unsettled model claims.",
+        "WHAT WOULD COUNT AS PROOF?",
+        "Why we can't claim accuracy yet",
+        "One house, overlapping windows and rare events are not a proof of generalisation.",
     )
-    columns = [
-        (
-            "REAL NOW",
-            GREEN,
-            PALE_GREEN,
-            [
-                "UK-DALE + WHITED data",
-                "ONNX inference, 5 appliances",
-                "Real test-set metrics",
-                "Web + mobile H5",
-                "21 API checks pass",
-            ],
-        ),
-        (
-            "BASELINE",
-            AMBER,
-            RGBColor(0xFF, 0xF8, 0xE6),
-            [
-                "WHITED 44.1% accuracy",
-                "Attention 0.71 vs baseline 0.76",
-                "Only one house evaluated",
-                "Microwave F1 only 0.29",
-            ],
-        ),
-        (
-            "OPEN",
-            MUTED,
-            RGBColor(0xF4, 0xF6, 0xF8),
-            [
-                "Cross-house generalisation",
-                "Unit tests and CI",
-                "Database migrations",
-                "Raw-waveform WHITED CNN",
-            ],
-        ),
+    reasons = [
+        ("1", "One house", "UK-DALE house 1", "No cross-house test; the model can learn this building's quirks."),
+        ("2", "Overlapping windows", "13,013 test windows", "3-minute stride: adjacent windows share most samples, so they are not independent."),
+        ("3", "Rare events", "34 microwave positives", f"The confidence interval is wide; F1 {metric('microwave', 'attention', 'event_f1'):.2f} is not a stable estimate."),
     ]
-    for index, (title, accent, fill, items) in enumerate(columns):
+    for index, (number, title, big, detail) in enumerate(reasons):
         x = 4.55 + index * 2.76
-        add_rect(slide, x, 1.78, 2.58, 0.50, accent, radius=0.1)
-        add_text(slide, title, x, 1.88, 2.58, 0.25, 9, WHITE, True, align=PP_ALIGN.CENTER, spacing=100)
-        add_rect(slide, x, 2.38, 2.58, 3.55, fill, BORDER, radius=0.04)
-        for item_index, item in enumerate(items):
-            add_text(slide, "•  " + item, x + 0.18, 2.58 + item_index * 0.60, 2.25, 0.50, 9.5, BODY)
+        add_rect(slide, x, 1.76, 2.58, 3.42, LIGHT, BORDER, radius=0.08)
+        add_rect(slide, x + 0.18, 1.96, 0.36, 0.36, TEAL, radius=0.5, shape=MSO_SHAPE.OVAL)
+        add_text(slide, number, x + 0.18, 2.01, 0.36, 0.22, 9, WHITE, True, align=PP_ALIGN.CENTER)
+        add_text(slide, title, x + 0.66, 1.98, 1.80, 0.28, 12, NAVY, True)
+        add_text(slide, big, x + 0.20, 2.55, 2.20, 0.65, 17, TEAL_DARK, True)
+        add_text(slide, detail, x + 0.20, 3.30, 2.18, 1.15, 9.2, BODY)
+        takeaway = ["So: no generalisation claim", "So: windows are not independent", "So: report per-class counts"][index]
+        add_text(slide, takeaway, x + 0.20, 4.58, 2.18, 0.30, 8.3, TEAL_DARK, True)
+    add_text(
+        slide,
+        "REAL NOW   ONNX · Web · mobile · 21 API checks        OPEN   cross-house · confidence intervals · WHITED CNN",
+        4.57,
+        5.38,
+        8.05,
+        0.28,
+        8.4,
+        MUTED,
+    )
     add_callout(
         slide,
-        "The system is real. The model claim is not settled yet - and this report says so.",
+        "What would prove it: a cross-house test, event-level confidence intervals, and more than one building.",
         4.55,
-        6.15,
+        5.82,
         8.10,
-        0.68,
+        0.95,
         fill=PALE_RED,
         color=RGBColor(0x99, 0x1B, 0x1B),
         size=11,
@@ -663,10 +908,10 @@ def build() -> None:
         "Four workstreams; one decision needed from you.",
     )
     plans = [
-        ("1", "Model", "Fair attention vs baseline; fix microwave", "YangYifei", "Output: updated ablation table"),
-        ("2", "Data", "House 2 cross-house test", "JinXinyi", "Output: cross-house F1"),
-        ("3", "Quality", "pytest + CI + database migrations", "JinXinyi", "Output: green CI + migrations"),
-        ("4", "WHITED", "Raw-waveform 1-D CNN", "YangYifei", "Output: CNN vs 44.1% baseline"),
+        ("1", "Model", "Focal loss + oversampling; fix microwave recall", "YangYifei", "Output: new F1 + curves"),
+        ("2", "Evidence", "Truth-vs-pred + threshold + CI", "JinXinyi", "Output: proof pack"),
+        ("3", "Data", "House 2 cross-house test", "JinXinyi", "Output: cross-house F1"),
+        ("4", "Quality", "pytest + CI after 11.25", "YangYifei", "Output: green CI"),
     ]
     positions = [(4.55, 1.75), (7.75, 1.75), (4.55, 3.55), (7.75, 3.55)]
     for (number, title, detail, owner, output), (x, y) in zip(plans, positions):
@@ -679,7 +924,7 @@ def build() -> None:
         add_text(slide, owner, x + 0.20, y + 1.30, 2.6, 0.22, 8.2, MUTED)
     add_callout(
         slide,
-        "Decision: approve ~2 h GPU time and house-2 preprocessing. Then we can report cross-house numbers next time.",
+        "Decision: approve ~2 h GPU time and house-2 preprocessing. 11.25 focus: evidence, not new features.",
         4.55,
         5.55,
         8.10,
@@ -710,23 +955,29 @@ def build() -> None:
     add_rect(slide, 1.18, 4.45, 2.2, 0.035, WHITE, radius=0, shape=MSO_SHAPE.RECTANGLE)
     add_text(slide, "Questions?", 1.15, 4.75, 5.0, 0.8, 30, WHITE, True)
     add_text(slide, "JinXinyi  ·  YangYifei  ·  YuShengbin", 1.18, 5.85, 8.0, 0.3, 11, WHITE)
-    add_text(slide, "11 November 2026", 1.18, 6.15, 5.0, 0.3, 10, WHITE)
+    add_text(slide, "25 November 2026", 1.18, 6.15, 5.0, 0.3, 10, WHITE)
 
     notes = [
-        "Welcome. This is a two-week progress report. The key message: the system now runs on real data, and we report the model results honestly.",
+        "Welcome. This is the 25 November progress report. The system runs on real data; the model results are reported honestly.",
         "NILM means one meter at the main switch, plus software that separates the appliances. No sensor is installed on each device.",
-        "In two weeks we moved from a synthetic demo to a real pipeline: real data, trained models, ONNX export, and both clients running.",
+        "We moved from a synthetic demo to a real pipeline: real data, trained models, ONNX export, and both clients running.",
         "UK-DALE house 1: six months, one reading every six seconds. The top panel is what the meter sees; the bottom panel is what is actually on.",
-        "The model sees a one-hour window of 599 readings and predicts one appliance's power at the centre. We train one model per appliance.",
-        "Event F1 measures how often switch-on/off events are correct. Four appliances are strong; microwave is weak. The baseline is still slightly better on average.",
-        "A two-hour example. Navy is the measured total; colours are the model's estimates. Kettle and dishwasher events are recovered from the total.",
+        "This is the class-imbalance slide. The microwave is ON only 0.39% of the time and has just 34 positive test windows. A model can look accurate by always saying OFF; that is why we use F1.",
+        "All epochs are shown. Training loss keeps falling, but validation loss flattens after about epoch 6. The best checkpoint is chosen by validation event F1, not the last epoch.",
+        "The baseline is a standard five-layer CNN. The attention model is smaller and adds channel and temporal attention. Same input, same output, same loss.",
+        "These are test-set results. Four appliances are strong; microwave is weak. The baseline is still competitive, and we say so.",
+        "Even at the best threshold, microwave recall is low. A 25× positive-weighted MSE raises Event F1 from 0.407 to 0.494 and recall to 0.68, with precision flat and slightly higher MAE; this is the targeted improvement experiment.",
+        "A two-hour window. Navy is the measured total; colours are the model estimates. These are estimates, not ground truth.",
+        "These are the professor's red circles. At 90-120 minutes the dishwasher is truly about 1.1 kW, but the model outputs about 0.1 kW. The residual is small, so this is a model recall failure, not an unmodeled appliance.",
         "WHITED is a second dataset: high-frequency start-up current from 100 devices. These short transients are another kind of appliance fingerprint.",
-        "We test on devices the model has never seen, which is strict. Only 18 of 40 classes have more than one device, so this is a baseline, not a final result.",
+        "We test on devices the model has never seen. Only 18 of 40 classes have more than one device, so this is a baseline, not a final result.",
+        "This is the full 40-class distribution. The long tail explains the 44.1% accuracy: 22 classes have only one device and therefore cannot be tested at all.",
+        "This slide answers 'why are the numbers what they are'. UK-DALE: attention wins MAE and Event F1 but loses State F1 and the cross-house ranking flips. WHITED: only 18 of 40 classes are evaluable, and the confusions are physically similar loads.",
         "Five layers: data, model, service, apps, and quality. All of them live in the repository and run locally.",
-        "This is the live Web console. The same API feeds the dashboard, evaluation and analytics pages.",
+        "This is the live Web console. The demo path is login, refresh, evaluation, analytics.",
         "This is the mobile H5 client. It is English-only and talks to the same backend.",
-        "We separate what is proven from what is still open. The software is real; the model claim is not settled yet.",
-        "Next two weeks: fair model comparison, cross-house data, tests and migrations, and a WHITED CNN. We need GPU time and house-2 preprocessing.",
+        "Why can't we claim accuracy yet? One house, overlapping windows, and rare events. A cross-house test and confidence intervals are what would count as proof.",
+        "Next two weeks: fix microwave recall, build the evidence pack, run house 2, and defer tests and CI until after 11.25.",
         "Thank you. Questions?",
     ]
     for slide, note in zip(prs.slides, notes):

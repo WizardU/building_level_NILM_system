@@ -106,7 +106,7 @@ def main() -> int:
     check("energy", energy.get("totalKWh", 0) > 0, f"{energy.get('totalKWh')} kWh, {len(energy.get('breakdown', []))} rows")
 
     reports = call(api, "/analytics/reports", token=token)
-    check("reports", len(reports.get("per_appliance", [])) == 10, f"{len(reports.get('per_appliance', []))} rows, samples={reports.get('samples')}")
+    check("reports", len(reports.get("per_appliance", [])) == 15, f"{len(reports.get('per_appliance', []))} rows, samples={reports.get('samples')}")
     check("reports no fake speed", all(v <= 100 for s in reports.get("series", []) for v in s["value"]), str([s["value"] for s in reports.get("series", [])]))
 
     metrics = call(api, "/analytics/metrics", token=token)

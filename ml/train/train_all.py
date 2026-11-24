@@ -13,9 +13,12 @@ CKPT_DIR = ROOT / "ml" / "checkpoints"
 FIELDS = [
     "appliance",
     "model",
+    "run",
+    "loss",
     "split",
     "samples",
     "mae",
+    "rmse",
     "sae",
     "state_accuracy",
     "state_precision",

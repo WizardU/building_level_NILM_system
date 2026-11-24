@@ -169,3 +169,17 @@ class WeightedHuberLoss(nn.Module):
         err = F.huber_loss(pred, target, delta=self.delta, reduction="none")
         w = torch.where(target.abs() > self.on_threshold, self.pos_weight, 1.0)
         return (err * w).mean()
+
+
+class WeightedMSELoss(nn.Module):
+    """MSE with a stronger penalty on ON windows (target above threshold)."""
+
+    def __init__(self, pos_weight: float = 25.0, on_threshold: float = 0.1):
+        super().__init__()
+        self.pos_weight = pos_weight
+        self.on_threshold = on_threshold
+
+    def forward(self, pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        err = (pred - target) ** 2
+        w = torch.where(target.abs() > self.on_threshold, self.pos_weight, 1.0)
+        return (err * w).mean()

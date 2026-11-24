@@ -1,0 +1,189 @@
+{
+  "rows": [
+    {
+      "appliance": "fridge",
+      "baseline_mse": {
+        "mae": 22.61,
+        "rmse": 34.349,
+        "sae": 0.0592,
+        "state_f1": 0.8388,
+        "event_f1": 0.9013
+      },
+      "baseline_weighted_huber": {
+        "mae": 21.337,
+        "rmse": 34.238,
+        "sae": 0.0906,
+        "state_f1": 0.8257,
+        "event_f1": 0.8911
+      },
+      "attention_mse": {
+        "mae": 22.697,
+        "rmse": 32.833,
+        "sae": 0.1017,
+        "state_f1": 0.8152,
+        "event_f1": 0.8782
+      },
+      "attention_weighted_huber": {
+        "mae": 21.819,
+        "rmse": 32.999,
+        "sae": 0.0805,
+        "state_f1": 0.8647,
+        "event_f1": 0.8786
+      }
+    },
+    {
+      "appliance": "kettle",
+      "baseline_mse": {
+        "mae": 8.029,
+        "rmse": 87.817,
+        "sae": 0.3137,
+        "state_f1": 0.8364,
+        "event_f1": 0.8519
+      },
+      "baseline_weighted_huber": {
+        "mae": 10.683,
+        "rmse": 82.337,
+        "sae": 0.1319,
+        "state_f1": 0.766,
+        "event_f1": 0.7742
+      },
+      "attention_mse": {
+        "mae": 6.982,
+        "rmse": 82.769,
+        "sae": 0.0956,
+        "state_f1": 0.8455,
+        "event_f1": 0.8595
+      },
+      "attention_weighted_huber": {
+        "mae": 10.187,
+        "rmse": 82.948,
+        "sae": 0.1358,
+        "state_f1": 0.8167,
+        "event_f1": 0.8376
+      }
+    },
+    {
+      "appliance": "microwave",
+      "baseline_mse": {
+        "mae": 7.954,
+        "rmse": 69.082,
+        "sae": 0.3682,
+        "state_f1": 0.4,
+        "event_f1": 0.439
+      },
+      "baseline_weighted_huber": {
+        "mae": 10.415,
+        "rmse": 83.002,
+        "sae": 1.2415,
+        "state_f1": 0.2683,
+        "event_f1": 0.3562
+      },
+      "attention_mse": {
+        "mae": 5.913,
+        "rmse": 66.782,
+        "sae": 0.1913,
+        "state_f1": 0.3188,
+        "event_f1": 0.4068
+      },
+      "attention_weighted_huber": {
+        "mae": 7.38,
+        "rmse": 75.891,
+        "sae": 0.397,
+        "state_f1": 0.3465,
+        "event_f1": 0.4158
+      }
+    },
+    {
+      "appliance": "dishwasher",
+      "baseline_mse": {
+        "mae": 12.34,
+        "rmse": 66.286,
+        "sae": 0.1982,
+        "state_f1": 0.9489,
+        "event_f1": 0.8718
+      },
+      "baseline_weighted_huber": {
+        "mae": 17.404,
+        "rmse": 68.277,
+        "sae": 0.6978,
+        "state_f1": 0.9143,
+        "event_f1": 0.8095
+      },
+      "attention_mse": {
+        "mae": 6.961,
+        "rmse": 67.295,
+        "sae": 0.0234,
+        "state_f1": 0.8784,
+        "event_f1": 0.8947
+      },
+      "attention_weighted_huber": {
+        "mae": 8.822,
+        "rmse": 78.604,
+        "sae": 0.0956,
+        "state_f1": 0.8369,
+        "event_f1": 0.8421
+      }
+    },
+    {
+      "appliance": "washing_machine",
+      "baseline_mse": {
+        "mae": 11.32,
+        "rmse": 57.087,
+        "sae": 0.0823,
+        "state_f1": 0.9273,
+        "event_f1": 0.8807
+      },
+      "baseline_weighted_huber": {
+        "mae": 8.14,
+        "rmse": 53.612,
+        "sae": 0.0068,
+        "state_f1": 0.9404,
+        "event_f1": 0.9245
+      },
+      "attention_mse": {
+        "mae": 9.689,
+        "rmse": 61.588,
+        "sae": 0.1341,
+        "state_f1": 0.95,
+        "event_f1": 0.9434
+      },
+      "attention_weighted_huber": {
+        "mae": 8.875,
+        "rmse": 61.183,
+        "sae": 0.0651,
+        "state_f1": 0.942,
+        "event_f1": 0.9216
+      }
+    }
+  ],
+  "means": {
+    "baseline_mse": {
+      "mae": 12.450599999999998,
+      "rmse": 62.9242,
+      "sae": 0.20432,
+      "state_f1": 0.7902800000000001,
+      "event_f1": 0.78894
+    },
+    "baseline_weighted_huber": {
+      "mae": 13.5958,
+      "rmse": 64.2932,
+      "sae": 0.43372,
+      "state_f1": 0.7429399999999999,
+      "event_f1": 0.7511
+    },
+    "attention_mse": {
+      "mae": 10.4484,
+      "rmse": 62.25340000000001,
+      "sae": 0.10922000000000001,
+      "state_f1": 0.76158,
+      "event_f1": 0.79652
+    },
+    "attention_weighted_huber": {
+      "mae": 11.416599999999999,
+      "rmse": 66.325,
+      "sae": 0.1548,
+      "state_f1": 0.76136,
+      "event_f1": 0.7791399999999999
+    }
+  }
+}

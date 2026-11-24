@@ -64,7 +64,7 @@ UKDALE_CHANNELS = {
 # preprocess on a laptop. Override on the CLI for full-year training.
 UKDALE_DEFAULT_RANGE = {
     1: ("2014-01-01", "2014-07-01"),
-    2: ("2013-03-01", "2013-09-01"),
+    2: ("2013-06-01", "2013-09-01"),
     5: ("2014-07-01", "2014-11-01"),
 }
 
