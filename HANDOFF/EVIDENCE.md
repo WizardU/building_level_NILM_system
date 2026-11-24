@@ -18,7 +18,16 @@
 | E6 | Mobile H5 run | `cd mobile && npm run dev:h5` | H5 page loads, 4 tabs |
 | E7 | Replay | `python -m adapters.replay.cli --speed 80 --batch 5` | dashboard timestamps advance |
 
-## 2. Provisional algorithm evidence (to Yang)
+## 2. Midterm ML evidence (YSB-owned)
+
+| # | Evidence | Path |
+|---|---|---|
+| M1 | Midterm 10 ONNX models (5 attention + 5 baseline) | `ml/checkpoints/*.onnx` (gitignored; local restore) |
+| M2 | Midterm 3-epoch results / report tables | `FYP-042Progress Report (1).docx` §3–§4 |
+| M3 | WHITED RF baseline (44.1% top-1, 18/40 classes) | `ml/checkpoints/whited_metrics.json` |
+| M4 | Training/eval code | `ml/models/seq2point.py`, `ml/train/train_one.py`, `ml/eval/evaluate.py` |
+
+## 3. Post-report improvement evidence (handoff to Yang)
 
 | # | Evidence | Path |
 |---|---|---|
@@ -30,10 +39,10 @@
 | A6 | Written summary | `MODEL_EVIDENCE.md` |
 | A7 | Commit/tag | `midterm-2026-11-30-evidence` / `72ed7bf` (main run) |
 
-> These are **provisional**; see `ALGORITHM_PROVISIONAL.md`. They are not YSB's final contribution and
-> must not replace the report's 3-epoch numbers without Yang's review.
+> These are post-report experiments. The **midterm** report keeps its 3-epoch numbers; these 8-epoch results
+> are for Yang's future-improvement track and must not silently replace the midterm table.
 
-## 3. What not to commit
+## 4. What not to commit
 
 - `data/raw/*.h5`, `data/processed/*` (large, gitignored)
 - `ml/checkpoints/*.pt`, `*.onnx`, `*.joblib` (gitignored)
@@ -41,7 +50,7 @@
 - Database `backend/nilm.db` (gitignored)
 - Any WEMUST/private course file
 
-## 4. Reproduce from a clean checkout
+## 5. Reproduce from a clean checkout
 
 ```powershell
 # 1. backend venv
@@ -62,13 +71,18 @@ ml\.venv\Scripts\python.exe scripts\smoke_api.py
 
 If the model artifacts are absent, `/readyz` falls back to `heuristic`; do not claim ONNX in that state.
 
-## 5. Report update text (ready to paste)
+## 6. Report update text (ready to paste)
 
 Replace the `[TBD: YSB backend & mobile commits]` row with:
 
-> U SENGPAN — backend + mobile H5: branch `handoff/ysb-engineering-midterm`, tag
-> `handoff-ysb-2026-11-25`, commit `<short-hash>` (course repo mirror: `<course-commit>`).
-> Evidence: 21/21 `scripts/smoke_api.py`, `report_build/shots/mobile_analytics.png`,
-> `report_build/shots/web_dashboard_tall.png`, `openapi/NILM.json`.
+> U SENGPAN — midterm M2 ML training/ONNX/eval + M3 backend + M5 mobile H5:
+> branch `handoff/ysb-engineering-midterm`, tag `handoff-ysb-2026-11-25`,
+> commit `<short-hash>` (course repo mirror: `<course-commit>`).
+> Evidence: 10 ONNX models, 3-epoch report tables, WHITED RF 44.1%, 21/21 `scripts/smoke_api.py`,
+> `report_build/shots/mobile_analytics.png`, `openapi/NILM.json`.
+
+Also change the M2 owner wording (see [REPORT_CORRECTION.md](REPORT_CORRECTION.md)):
+
+> Midterm M2 training/ONNX/WHITED RF: **U SENGPAN**; W5+ M2 improvements: **Yang Yifei**.
 
 Use the actual hash printed after `git push`; do not leave `<...>` in the final report.

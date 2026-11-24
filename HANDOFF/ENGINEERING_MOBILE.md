@@ -1,7 +1,8 @@
-# Engineering & mobile delivery (YSB)
+# Engineering, mobile & midterm ML delivery (YSB)
 
-**Scope:** M3 FastAPI backend/API + M5 Uni-app mobile H5.  
-**Primary ownership:** mobile client; shared backend/API integration.  
+**Scope:** M2 midterm ML training/ONNX/evaluation + M3 FastAPI backend/API + M5 Uni-app mobile H5.  
+**Primary ownership:** mobile client; shared backend/API integration; midterm ML training/ONNX.  
+**Future M2 improvements:** Yang Yifei (W5+).  
 **Status:** H5 complete and verified; native builds deferred; backend is the local SQLite/ONNX demo backend.
 
 ## 1. What was delivered

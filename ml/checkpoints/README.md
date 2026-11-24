@@ -1,7 +1,8 @@
 # Checkpoints index
 
 > Binary `.pt`, `.onnx`, `.joblib` files are **gitignored**. The tracked JSON/CSV files are the evidence.
-> See `HANDOFF/ALGORITHM_PROVISIONAL.md`: the algorithm work is provisional and owned by Yang Yifei.
+> Midterm M2 training/ONNX is U SENGPAN's; W5+ improvements are Yang Yifei's. See
+> `HANDOFF/ALGORITHM_PROVISIONAL.md`.
 
 ## Production demo (attention + MSE)
 

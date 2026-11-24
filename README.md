@@ -7,8 +7,8 @@ This repository is no longer a mock-only demo: the Web and mobile clients read
 real UK-DALE house 1 data through ONNX Runtime.
 
 > **Midterm handoff:** see [HANDOFF/README.md](HANDOFF/README.md).
-> Engineering/mobile is U SENGPAN's scope; `ml/` training/eval is provisional
-> local scaffolding to hand to Yang Yifei, not YSB's final contribution.
+> U SENGPAN owns the midterm ML training/ONNX/evaluation, backend and mobile H5;
+> W5+ model improvements are Yang Yifei's. M1 official preprocessing remains Jin Xinyi's.
 
 ## What works today
 

@@ -80,6 +80,8 @@ If authentication fails, keep the local branch; do not rewrite `origin`.
 
 `[TBD: YSB backend & mobile commits]` →
 
-> U SENGPAN — backend + mobile H5: `handoff/ysb-engineering-midterm`,
-> tag `handoff-ysb-2026-11-25`, commit `<hash>` (course repo).
-> 21/21 API checks; mobile H5 screenshot; OpenAPI 38 paths.
+> U SENGPAN — midterm M2 ML training/ONNX/eval + M3 backend + M5 mobile H5:
+> `handoff/ysb-engineering-midterm`, tag `handoff-ysb-2026-11-25`, commit `<hash>` (course repo).
+> 10 ONNX models, 3-epoch report tables, WHITED RF 44.1%, 21/21 API checks, OpenAPI 38 paths.
+
+Also update the M2 owner row: midterm M2 = U SENGPAN; W5+ improvements = Yang Yifei.
