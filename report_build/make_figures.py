@@ -170,39 +170,40 @@ def fig_metrics() -> None:
     rows = [r for r in rows if r.get("loss") == "mse"]
     order = APPLIANCES + ["__mean__"]
     models = [("baseline", "Baseline CNN", GREY), ("dilated", "Dilated only", ORANGE), ("attention", "Attention (proposed)", GREEN)]
-    fig, ax = plt.subplots(figsize=(9.4, 4.7))
+    fig, (ax_event, ax_state) = plt.subplots(1, 2, figsize=(10.4, 4.9), sharey=True)
+    fig.subplots_adjust(top=0.82, bottom=0.14, wspace=0.08)
     y = np.arange(len(order))
     height = 0.24
     offsets = [-height, 0.0, height]
-    values_by_model = {name: [] for name, _, _ in models}
+    values = {name: {"event_f1": [], "state_f1": []} for name, _, _ in models}
     for appliance in order:
         for name, _, _ in models:
             if appliance == "__mean__":
-                value = np.mean([r["event_f1"] for r in rows if r["model"] == name])
+                event = np.mean([r["event_f1"] for r in rows if r["model"] == name])
+                state = np.mean([r["state_f1"] for r in rows if r["model"] == name])
             else:
-                value = next(r["event_f1"] for r in rows if r["appliance"] == appliance and r["model"] == name)
-            values_by_model[name].append(value)
+                row = next(r for r in rows if r["appliance"] == appliance and r["model"] == name)
+                event, state = row["event_f1"], row["state_f1"]
+            values[name]["event_f1"].append(event)
+            values[name]["state_f1"].append(state)
 
     for (name, label, color), offset in zip(models, offsets):
-        values = values_by_model[name]
-        ax.barh(y + offset, values, height=height, color=color, label=label)
-        for idx, value in enumerate(values):
-            ax.text(value + 0.01, idx + offset, f"{value:.2f}", va="center", fontsize=8, color=TEAL_DARK if name == "attention" else "#64748B")
-    ax.set_yticks(y)
-    ax.set_yticklabels([LABELS.get(a, "Average") for a in order], fontsize=11)
-    ax.invert_yaxis()
-    ax.set_xlim(0, 1.0)
-    ax.set_xlabel("Event-level F1 (higher is better)", fontsize=12)
-    ax.spines[["top", "right"]].set_visible(False)
-    ax.legend(
-        loc="lower right",
-        bbox_to_anchor=(1.0, 1.02),
-        ncol=3,
-        frameon=False,
-        fontsize=9,
-    )
-    fig.tight_layout()
-    fig.savefig(OUT / "fig_metrics.png", dpi=200, bbox_inches="tight")
+        for ax, key in ((ax_event, "event_f1"), (ax_state, "state_f1")):
+            vals = values[name][key]
+            ax.barh(y + offset, vals, height=height, color=color, label=label)
+            for idx, value in enumerate(vals):
+                ax.text(value + 0.01, idx + offset, f"{value:.2f}", va="center", fontsize=7, color=TEAL_DARK if name == "attention" else "#64748B")
+    for ax, title in ((ax_event, "Event F1"), (ax_state, "State F1")):
+        ax.set_xlim(0, 1.0)
+        ax.set_title(title, fontsize=12, color=NAVY, weight="bold")
+        ax.spines[["top", "right"]].set_visible(False)
+        ax.tick_params(axis="x", labelsize=8)
+    ax_event.set_yticks(y)
+    ax_event.set_yticklabels([LABELS.get(a, "Average") for a in order], fontsize=10)
+    ax_event.invert_yaxis()
+    handles, labels = ax_event.get_legend_handles_labels()
+    fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(0.5, 0.99), ncol=3, frameon=False, fontsize=9)
+    fig.savefig(OUT / "fig_metrics.png", dpi=220, bbox_inches="tight")
     plt.close(fig)
 
 

@@ -272,11 +272,35 @@ def fig_failure() -> None:
     plt.close(fig)
 
 
+def fig_whited_classes() -> None:
+    metrics = json.loads((ROOT / "ml/checkpoints/whited_metrics.json").read_text(encoding="utf-8"))
+    tested = {row["label"] for row in metrics["per_class"] if row["support"] > 0}
+    counts = sorted(metrics["class_counts"].items(), key=lambda item: item[1])
+    labels = [name for name, _ in counts]
+    values = [count for _, count in counts]
+    colors = [GREEN if name in tested else "#CBD5E1" for name in labels]
+
+    fig, ax = plt.subplots(figsize=(5.6, 5.4))
+    ax.barh(labels, values, color=colors, height=0.72)
+    for idx, value in enumerate(values):
+        ax.text(value + 0.8, idx, str(value), va="center", fontsize=7, color="#475569")
+    ax.set_xlabel("Recordings per class", fontsize=9)
+    ax.set_xlim(0, max(values) * 1.18)
+    ax.tick_params(axis="y", labelsize=7)
+    ax.tick_params(axis="x", labelsize=8)
+    ax.spines[["top", "right"]].set_visible(False)
+    ax.set_title("40 WHITED classes: 18 evaluated (green), 22 train-only (grey)", fontsize=10, color=NAVY, weight="bold")
+    fig.tight_layout()
+    fig.savefig(OUT / "fig_whited_classes.png", dpi=220, bbox_inches="tight")
+    plt.close(fig)
+
+
 def main() -> None:
     fig_imbalance()
     fig_training_all()
     fig_threshold_curves()
     fig_failure()
+    fig_whited_classes()
     print("feedback figures written to", OUT)
 
 

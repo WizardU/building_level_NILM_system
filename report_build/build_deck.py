@@ -453,9 +453,9 @@ def build() -> None:
     add_text(slide, f"{params_of('attention')/1e6:.1f}M params", right_x, 1.90, col_w, 0.22, 8.5, MUTED)
 
     baseline = [
-        "Input  ·  599 samples",
-        "5 × Conv1D  ·  30 to 50 filters",
-        "Fully connected  ·  1024",
+        "Input  ·  (1 × 599)",
+        "5 × Conv1D  ·  k=5, 30→50 filters",
+        "Flatten  ·  50 × 599 → FC 1024",
         "Output  ·  one power value",
     ]
     for index, text in enumerate(baseline):
@@ -466,12 +466,12 @@ def build() -> None:
     add_text(slide, "Standard Seq2Point baseline", left_x, 5.02, col_w, 0.25, 9, MUTED)
 
     attention = [
-        "Input  ·  599 samples",
-        "Stem Conv1D  ·  32",
-        "4 × dilated residual  ·  d=1,2,4,8",
-        "Channel attention",
-        "Temporal attention",
-        "Fully connected  ·  512",
+        "Input  ·  (1 × 599)",
+        "Stem Conv1D  ·  k=5, 32 filters",
+        "4 × DilatedBlock  ·  k=5, d=1/2/4/8",
+        "Channel attention  ·  32→8→32",
+        "Temporal attention  ·  Conv1d k=1 → softmax",
+        "FC 512  →  output 1",
         "Output  ·  one power value",
     ]
     for index, text in enumerate(attention):
@@ -548,7 +548,7 @@ def build() -> None:
     add_figure(slide, FIGS / "fig_threshold.png", 4.55, 1.76, 8.08, 3.90)
     add_callout(
         slide,
-        "Threshold tuning moves the operating point; it cannot create missing detections. Next: focal loss, oversampling, event-level post-processing.",
+        "Threshold alone cannot fix recall. A 25× positive-weighted MSE lifts microwave Event F1 0.407→0.494 (recall 0.68, precision flat), with slightly higher MAE; next is event-level post-processing.",
         4.55,
         5.82,
         8.10,
@@ -654,7 +654,92 @@ def build() -> None:
     add_text(slide, "This is a baseline, not a final result; a raw-waveform CNN is next.", 4.57, 6.72, 8.0, 0.22, 8.5, MUTED)
     add_footer(slide, 9)
 
-    # 10 — Architecture
+    # 10 — WHITED class distribution + classifier
+    slide = blank(prs)
+    add_section(slide, "06", "Second dataset", "40 CLASSES")
+    add_header(
+        slide,
+        "CLASS DISTRIBUTION  ·  RF BASELINE",
+        "A long tail of start-ups",
+        "18 classes are evaluable; 22 have only one device and stay train-only.",
+    )
+    add_figure(slide, FIGS / "fig_whited_classes.png", 4.55, 1.70, 4.25, 4.60)
+    rf_steps = [
+        "FLAC current channel  ·  44.1 kHz",
+        "120 ms switch-on window",
+        "19 time-frequency features",
+        "Random Forest  ·  400 trees",
+        "Class + top-3 prediction",
+    ]
+    for index, text in enumerate(rf_steps):
+        y = 1.82 + index * 0.78
+        add_rect(slide, 9.10, y, 3.55, 0.50, LIGHT, BORDER, radius=0.1)
+        add_text(slide, text, 9.22, y, 3.30, 0.50, 9.2, NAVY, True, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+        if index < len(rf_steps) - 1:
+            add_rect(slide, 10.78, y + 0.51, 0.18, 0.10, BORDER, radius=0.2, shape=MSO_SHAPE.DOWN_ARROW)
+    add_callout(
+        slide,
+        "The long tail explains the 44.1% accuracy: 22 classes have only one device, so they cannot appear in the test set at all.",
+        9.10,
+        5.80,
+        3.55,
+        1.05,
+        size=9.5,
+    )
+    add_text(slide, "This is the baseline classifier; a raw-waveform CNN is next.", 4.57, 6.45, 8.0, 0.22, 8.5, MUTED)
+    add_footer(slide, 10)
+
+    # 11 — Why the numbers are what they are
+    slide = blank(prs)
+    add_section(slide, "06", "Second dataset", "WHY?")
+    add_header(
+        slide,
+        "CROSS-CHECK  ·  BOTH DATASETS",
+        "Why the numbers are what they are",
+        "Two datasets, two different reasons; neither is a clean win.",
+    )
+    cards = [
+        (
+            4.55,
+            "UK-DALE  ·  house 1 → house 2",
+            [
+                "Attention wins MAE (−16.1%) and Event F1 (+0.008), but baseline wins State F1 (0.790 vs 0.762).",
+                "Cross-house ranking flips: baseline 0.814 vs attention 0.775 Event F1.",
+                "So: do not claim a universal 'better model'; report the trade-off.",
+            ],
+            RED,
+        ),
+        (
+            8.65,
+            "WHITED  ·  20 unseen devices",
+            [
+                "44.1% top-1, 71.8% top-3; 18 of 40 classes are evaluable.",
+                "22 classes have only one device, so they cannot appear in the test set.",
+                "Confusions are physical: coffee machine/iron → kettle; laptop/monitor → game console.",
+            ],
+            TEAL_DARK,
+        ),
+    ]
+    for x, title, bullets, accent in cards:
+        add_rect(slide, x, 1.72, 3.72, 4.15, LIGHT, BORDER, radius=0.06)
+        add_text(slide, title, x + 0.20, 1.90, 3.32, 0.30, 11.5, accent, True)
+        for index, bullet in enumerate(bullets):
+            add_text(slide, "•  " + bullet, x + 0.20, 2.38 + index * 1.02, 3.30, 0.90, 9.3, BODY)
+    add_callout(
+        slide,
+        "What would change the conclusion: focal/oversampling for microwave, a cross-dataset test, and a full 3-seed repeat.",
+        4.55,
+        6.10,
+        7.82,
+        0.72,
+        fill=PALE_RED,
+        color=RGBColor(0x99, 0x1B, 0x1B),
+        size=10.5,
+        bold=True,
+    )
+    add_footer(slide, 11)
+
+    # 12 — Architecture
     slide = blank(prs)
     add_section(slide, "07", "System", "FIVE LAYERS")
     add_header(
@@ -881,11 +966,13 @@ def build() -> None:
         "All epochs are shown. Training loss keeps falling, but validation loss flattens after about epoch 6. The best checkpoint is chosen by validation event F1, not the last epoch.",
         "The baseline is a standard five-layer CNN. The attention model is smaller and adds channel and temporal attention. Same input, same output, same loss.",
         "These are test-set results. Four appliances are strong; microwave is weak. The baseline is still competitive, and we say so.",
-        "Even at the best threshold, microwave recall is low. The next step is focal loss, oversampling and event-level post-processing, not more threshold tuning.",
+        "Even at the best threshold, microwave recall is low. A 25× positive-weighted MSE raises Event F1 from 0.407 to 0.494 and recall to 0.68, with precision flat and slightly higher MAE; this is the targeted improvement experiment.",
         "A two-hour window. Navy is the measured total; colours are the model estimates. These are estimates, not ground truth.",
         "These are the professor's red circles. At 90-120 minutes the dishwasher is truly about 1.1 kW, but the model outputs about 0.1 kW. The residual is small, so this is a model recall failure, not an unmodeled appliance.",
         "WHITED is a second dataset: high-frequency start-up current from 100 devices. These short transients are another kind of appliance fingerprint.",
         "We test on devices the model has never seen. Only 18 of 40 classes have more than one device, so this is a baseline, not a final result.",
+        "This is the full 40-class distribution. The long tail explains the 44.1% accuracy: 22 classes have only one device and therefore cannot be tested at all.",
+        "This slide answers 'why are the numbers what they are'. UK-DALE: attention wins MAE and Event F1 but loses State F1 and the cross-house ranking flips. WHITED: only 18 of 40 classes are evaluable, and the confusions are physically similar loads.",
         "Five layers: data, model, service, apps, and quality. All of them live in the repository and run locally.",
         "This is the live Web console. The demo path is login, refresh, evaluation, analytics.",
         "This is the mobile H5 client. It is English-only and talks to the same backend.",

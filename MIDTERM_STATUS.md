@@ -68,6 +68,7 @@
 4. 损失消融：MSE baseline 0.789 / 12.45，加权 Huber baseline 0.751 / 13.60；MSE attention 0.797 / 10.45，加权 Huber attention 0.779 / 11.42。**本数据集上 MSE 优于加权 Huber**，不能把加权 Huber 当作已证实的改进。
 5. 跨房屋（house1 训练 → house2 测试，44,141 窗口）：attention Event F1 0.797→0.775、MAE 10.45→13.97；baseline Event F1 0.789→0.814、MAE 12.45→15.06。attention 跨房屋 MAE 更低，但 Event F1 低于 baseline，ranking 发生变化。
 6. 微波炉仍是最差项；阈值扫描最好也只有约 0.52，说明是召回问题。下一步：focal/过采样/事件后处理，而不是继续调阈值。
+7. 已做一个针对性微波炉实验：attention + **25× 正样本加权 MSE**，Event F1 从 0.407 → **0.494**，recall 0.43 → **0.68**，precision 基本持平，MAE 5.91 → 6.97 W；这是离线实验，尚未部署。
 
 ### 3.2 WHITED 电器识别（第二数据集）
 

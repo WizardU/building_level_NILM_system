@@ -1,6 +1,6 @@
 # Model evidence — 2026-11-20
 
-Evidence commit: `8ae56fd` · tag: `midterm-2026-11-30-evidence`.
+Evidence commit: `f6a643e` · tag: `midterm-2026-11-30-evidence`.
 
 All numbers are test-set values. The three models below use **MSE** (the proposal's baseline loss), same 8 epochs and seed 42; the loss ablation is separate.
 
@@ -50,3 +50,15 @@ All numbers are test-set values. The three models below use **MSE** (the proposa
 | Dilated | 12.99 | 11.10–15.06 (mean of per-appliance CIs) | 64.1 | — |
 
 > The CI is a block bootstrap over overlapping windows; it is indicative, not a substitute for independent houses. Event F1 is reported as a point estimate with its positive-window count because event matching is not additive across resampled blocks.
+
+## 5. Targeted microwave improvement (single-appliance experiment)
+
+The class imbalance is not only diagnosed; one targeted change was tested.
+
+| Microwave variant | Event F1 | Recall | Precision | MAE |
+|---|---:|---:|---:|---:|
+| Attention + MSE | 0.407 | 0.43 | 0.39 | 5.91 W |
+| Attention + 25× positive-weighted MSE | **0.494** | **0.68** | 0.39 | 6.97 W |
+| Baseline + MSE | 0.439 | 0.64 | 0.33 | 7.95 W |
+
+The 25× weighting raises recall from 0.43 to 0.68 and Event F1 from 0.407 to 0.494, at the cost of lower precision and slightly higher MAE. It is an offline experiment, not yet the deployed model; the next step is event-level post-processing and a precision/recall trade-off on validation.

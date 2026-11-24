@@ -13,7 +13,7 @@ import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from models.seq2point import WeightedHuberLoss, build_model
+from models.seq2point import WeightedHuberLoss, WeightedMSELoss, build_model
 from preprocess.config import ON_THRESHOLDS, PROCESSED_DIR, ROOT, WINDOW_SIZE
 from train.dataset import WindowDataset
 from train.metrics import evaluate_all
@@ -72,6 +72,7 @@ def train(
     num_workers: int = 0,
     run_name: str | None = None,
     loss_name: str | None = None,
+    pos_weight: float = 10.0,
 ) -> dict:
     seed_everything(seed)
     manifest = json.loads((PROCESSED_DIR / "dataset_manifest.json").read_text(encoding="utf-8"))
@@ -93,9 +94,12 @@ def train(
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = build_model(model_name, WINDOW_SIZE).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=lr)
-    criterion = (
-        WeightedHuberLoss(pos_weight=10.0) if use_weighted_huber else torch.nn.MSELoss()
-    )
+    if loss_name == "weighted_mse":
+        criterion = WeightedMSELoss(pos_weight=pos_weight)
+    elif use_weighted_huber:
+        criterion = WeightedHuberLoss(pos_weight=pos_weight)
+    else:
+        criterion = torch.nn.MSELoss()
 
     stats = manifest["stats"][appliance]
     default_threshold = float(ON_THRESHOLDS[appliance])
@@ -204,6 +208,7 @@ def main() -> None:
     parser.add_argument("--weighted-huber", action="store_true")
     parser.add_argument("--run-name", default=None)
     parser.add_argument("--loss-name", default=None)
+    parser.add_argument("--pos-weight", type=float, default=10.0)
     args = parser.parse_args()
     train(
         args.appliance,
@@ -217,6 +222,7 @@ def main() -> None:
         num_workers=args.num_workers,
         run_name=args.run_name,
         loss_name=args.loss_name,
+        pos_weight=args.pos_weight,
     )
 
 

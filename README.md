@@ -111,6 +111,10 @@ MSE is stronger than weighted Huber at 8 epochs; cross-house Event F1 is
 0.775 for attention and 0.814 for baseline, while attention has the lower
 cross-house MAE (13.97 vs 15.06 W).
 
+A targeted microwave experiment (attention + 25× positive-weighted MSE) lifts
+microwave Event F1 from 0.407 to **0.494** and recall from 0.43 to 0.68, with
+precision roughly flat; it is not yet the deployed model.
+
 ## Layout
 
 | Path | Role |

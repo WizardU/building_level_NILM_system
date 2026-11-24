@@ -168,6 +168,7 @@ Web ──GET /analytics/reports──▶ ablation_metrics.json → 雷达图/�
 - baseline State F1 更高（0.790 vs 0.762）；微波炉 attention 反而最差（0.407 vs 0.439），不能宣称全面更优。
 - 损失消融：MSE 全面优于加权 Huber（baseline 0.789/12.45 vs 0.751/13.60；attention 0.797/10.45 vs 0.779/11.42）；加权 Huber 不应再被当成已证实的改进。
 - 跨房屋（house1→house2，44,141 窗口）：attention Event F1 0.775、MAE 13.97；baseline Event F1 0.814、MAE 15.06。跨房屋 ranking 发生变化，泛化仍未解决。
+- 微波炉针对性实验：attention + 25× 正样本加权 MSE，Event F1 0.407→0.494，recall 0.43→0.68，precision 基本持平，MAE 5.91→6.97 W；离线实验，尚未部署。
 - 模型选择/阈值搜索只在验证集完成；单房屋 + 跨房屋各一组，仍不足以声称普遍泛化。
 
 ---

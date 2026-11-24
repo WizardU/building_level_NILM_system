@@ -1,0 +1,20 @@
+{
+  "appliance": "microwave",
+  "model": "attention",
+  "run": "microwave_attention_wmse25",
+  "loss": "weighted_mse",
+  "split": "test",
+  "samples": 13013,
+  "mae": 6.974,
+  "rmse": 68.037,
+  "sae": 0.1669,
+  "state_accuracy": 0.9956,
+  "state_precision": 0.3051,
+  "state_recall": 0.5294,
+  "state_f1": 0.3871,
+  "event_precision": 0.3878,
+  "event_recall": 0.6786,
+  "event_f1": 0.4935,
+  "on_threshold": 200.0,
+  "params": 9836166
+}
