@@ -295,12 +295,69 @@ def fig_whited_classes() -> None:
     plt.close(fig)
 
 
+def fig_cross_house() -> None:
+    import json
+
+    metrics = json.loads((ROOT / "ml/checkpoints/ablation_metrics.json").read_text(encoding="utf-8"))
+    cross = json.loads((ROOT / "ml/checkpoints/cross_house_house2.json").read_text(encoding="utf-8"))
+    models = ["baseline", "dilated", "attention"]
+    labels = ["Baseline", "Dilated", "Attention"]
+    house1 = {}
+    for model in models:
+        rows = [r for r in metrics if r["model"] == model and r.get("loss") == "mse"]
+        house1[model] = {
+            "event_f1": np.mean([r["event_f1"] for r in rows]),
+            "mae": np.mean([r["mae"] for r in rows]),
+        }
+    house2 = {}
+    for model in models:
+        rows = [r for r in cross if r["model"] == model]
+        house2[model] = {
+            "event_f1": np.mean([r["event_f1"] for r in rows]),
+            "mae": np.mean([r["mae"] for r in rows]),
+        }
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8.8, 3.4))
+    x = np.arange(len(models))
+    width = 0.34
+    h1_event = [house1[m]["event_f1"] for m in models]
+    h2_event = [house2[m]["event_f1"] for m in models]
+    ax1.bar(x - width / 2, h1_event, width, color="#CBD5E1", label="House 1")
+    ax1.bar(x + width / 2, h2_event, width, color=TEAL_DARK, label="House 2")
+    for idx, (a, b) in enumerate(zip(h1_event, h2_event)):
+        ax1.text(idx - width / 2, a + 0.01, f"{a:.3f}", ha="center", fontsize=7.5, color="#64748B")
+        ax1.text(idx + width / 2, b + 0.01, f"{b:.3f}", ha="center", fontsize=7.5, color=TEAL_DARK)
+    ax1.set_xticks(x)
+    ax1.set_xticklabels(labels, fontsize=9)
+    ax1.set_ylim(0, 1.0)
+    ax1.set_title("Event F1", fontsize=11, color=NAVY, weight="bold")
+    ax1.spines[["top", "right"]].set_visible(False)
+
+    h1_mae = [house1[m]["mae"] for m in models]
+    h2_mae = [house2[m]["mae"] for m in models]
+    ax2.bar(x - width / 2, h1_mae, width, color="#CBD5E1")
+    ax2.bar(x + width / 2, h2_mae, width, color=TEAL_DARK)
+    for idx, (a, b) in enumerate(zip(h1_mae, h2_mae)):
+        ax2.text(idx - width / 2, a + 0.2, f"{a:.1f}", ha="center", fontsize=7.5, color="#64748B")
+        ax2.text(idx + width / 2, b + 0.2, f"{b:.1f}", ha="center", fontsize=7.5, color=TEAL_DARK)
+    ax2.set_xticks(x)
+    ax2.set_xticklabels(labels, fontsize=9)
+    ax2.set_ylabel("MAE (W)", fontsize=9)
+    ax2.set_title("MAE", fontsize=11, color=NAVY, weight="bold")
+    ax2.spines[["top", "right"]].set_visible(False)
+    fig.text(0.5, 0.99, "Light = house 1   ·   dark = house 2", ha="center", fontsize=8, color=GREY)
+    fig.tight_layout()
+    fig.savefig(OUT / "fig_cross_house.png", dpi=220, bbox_inches="tight")
+    plt.close(fig)
+
+
 def main() -> None:
     fig_imbalance()
     fig_training_all()
     fig_threshold_curves()
     fig_failure()
     fig_whited_classes()
+    fig_cross_house()
     print("feedback figures written to", OUT)
 
 
