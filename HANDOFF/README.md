@@ -1,6 +1,6 @@
 # USP midterm delivery & handoff
 
-**Owner:** U SENGPAN (student ID 1230001605)  
+**Owner:** U SENGPAN (USP)  
 **Midterm scope:** **M2 ML training/ONNX/evaluation (existing report work) + M3 backend/API + M5 Uni-app mobile H5**  
 **Future M2 improvements:** Yang Yifei (W5+; see the report's W5/W6 plan)  
 **Date:** 2026-11-25  
