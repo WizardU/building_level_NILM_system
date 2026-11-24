@@ -6,6 +6,10 @@ disaggregation, FastAPI backend, Vue 3 Web console and a uni-app mobile client.
 This repository is no longer a mock-only demo: the Web and mobile clients read
 real UK-DALE house 1 data through ONNX Runtime.
 
+> **Midterm handoff:** see [HANDOFF/README.md](HANDOFF/README.md).
+> Engineering/mobile is U SENGPAN's scope; `ml/` training/eval is provisional
+> local scaffolding to hand to Yang Yifei, not YSB's final contribution.
+
 ## What works today
 
 - **Real dataset**: UK-DALE house 1, 2014-01-01 → 2014-07-01, 2,606,400 samples

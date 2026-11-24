@@ -45,6 +45,9 @@ const opts = {
     gridColor: '#E2E8F0',
     fontSize: 10,
     color: '#64748B',
+    title: 'W',
+    titleFontSize: 10,
+    titleColor: '#64748B',
     min: 0
   },
   extra: {

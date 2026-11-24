@@ -1,0 +1,85 @@
+# Course repo integration
+
+## Current reality
+
+- This workspace's `origin` is **personal**: `https://github.com/WizardU/building_level_NILM_system.git`
+- The progress report names the course repo: **`MUST-BIT-BEIE-FYP-2026/fyp-2026-042`**
+- That course repo is **not configured** as a remote here, and its history is not the same as this repo's
+  short history (`ce8c55c` is the local base). Do not pretend the hashes are interchangeable.
+
+## Option A — you have access to the course repo (preferred)
+
+```powershell
+cd NILM
+git remote add course https://github.com/MUST-BIT-BEIE-FYP-2026/fyp-2026-042.git
+git fetch course
+git checkout -b handoff/ysb-engineering-midterm course/main
+```
+
+Copy only YSB-owned paths from this workspace into the course branch:
+
+```text
+backend/
+mobile/
+openapi/
+scripts/smoke_api.py
+scripts/demo_web.*
+scripts/demo_mobile.*
+HANDOFF/
+```
+
+Then:
+
+```powershell
+git add backend mobile openapi scripts HANDOFF
+git commit -m "feat(ysb): backend API + Uni-app H5 handoff and evidence"
+git tag handoff-ysb-2026-11-25
+git push -u course handoff/ysb-engineering-midterm
+```
+
+If your identity is not configured:
+
+```powershell
+git config user.name "U SENGPAN"
+git config user.email "<your GitHub email>"
+```
+
+## Option B — no course access yet
+
+1. Push the handoff branch to the personal remote (below).
+2. Send the course-repo owner:
+   - branch name + tag;
+   - `HANDOFF/ENGINEERING_MOBILE.md`;
+   - `HANDOFF/EVIDENCE.md`;
+   - a ZIP of `backend/`, `mobile/`, `openapi/`, `scripts/smoke_api.py`, `HANDOFF/`.
+3. After they create the course branch, replace `[TBD: YSB backend & mobile commits]` in the report
+   with the course commit hash.
+
+## Option C — patch/bundle
+
+Because the histories differ, a `git format-patch` of this branch only contains the handoff docs,
+not the full backend/mobile tree. Prefer a ZIP/tree copy. If a bundle is required:
+
+```powershell
+git bundle create ..\NILM_YSB_ENGINEERING_2026-11-25.bundle handoff/ysb-engineering-midterm
+```
+
+The course repo can `git fetch <bundle> handoff/ysb-engineering-midterm:handoff/ysb-engineering-midterm`
+only if it accepts an unrelated history; otherwise copy the tree.
+
+## Personal remote push (this workspace)
+
+```powershell
+git push -u origin handoff/ysb-engineering-midterm
+git push origin handoff-ysb-2026-11-25
+```
+
+If authentication fails, keep the local branch; do not rewrite `origin`.
+
+## Report line to replace
+
+`[TBD: YSB backend & mobile commits]` →
+
+> U SENGPAN — backend + mobile H5: `handoff/ysb-engineering-midterm`,
+> tag `handoff-ysb-2026-11-25`, commit `<hash>` (course repo).
+> 21/21 API checks; mobile H5 screenshot; OpenAPI 38 paths.
