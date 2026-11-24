@@ -1,22 +1,22 @@
-# YSB midterm delivery & handoff
+# USP midterm delivery & handoff
 
 **Owner:** U SENGPAN (student ID 1230001605)  
 **Midterm scope:** **M2 ML training/ONNX/evaluation (existing report work) + M3 backend/API + M5 Uni-app mobile H5**  
 **Future M2 improvements:** Yang Yifei (W5+; see the report's W5/W6 plan)  
 **Date:** 2026-11-25  
-**Branch:** `handoff/ysb-engineering-midterm`  
-**Tag:** `handoff-ysb-2026-11-25`
+**Branch:** `handoff/usp-engineering-midterm`  
+**Tag:** `handoff-usp-2026-11-25`
 
-> Important correction: the midterm ML training/ONNX/WHITED baseline in the progress report is **YSB's work**.
+> Important correction: the midterm ML training/ONNX/WHITED baseline in the progress report is **USP's work**.
 > The later improvements (dilated/Huber/3-seed/cross-house/REDD/PLAID/WHITED CNN) are handed to Yang.
-> M1 official preprocessing remains Jin Xinyi's; YSB's `data/processed` is a local fallback, not the official M1 output.
+> M1 official preprocessing remains Jin Xinyi's; USP's `data/processed` is a local fallback, not the official M1 output.
 
 ## What is in this folder
 
 | File | Purpose |
 |---|---|
-| [ENGINEERING_MOBILE.md](ENGINEERING_MOBILE.md) | YSB's backend/mobile delivery, run commands, evidence, gaps |
-| [ALGORITHM_PROVISIONAL.md](ALGORITHM_PROVISIONAL.md) | Midterm ML work (YSB) + future improvement handoff (Yang) + data caveats |
+| [ENGINEERING_MOBILE.md](ENGINEERING_MOBILE.md) | USP's backend/mobile delivery, run commands, evidence, gaps |
+| [ALGORITHM_PROVISIONAL.md](ALGORITHM_PROVISIONAL.md) | Midterm ML work (USP) + future improvement handoff (Yang) + data caveats |
 | [EVIDENCE.md](EVIDENCE.md) | 21 API checks, screenshots, commits/tags, reproducibility commands |
 | [REPO_MAP.md](REPO_MAP.md) | Directory ownership and production/provisional boundary |
 | [REPORT_CORRECTION.md](REPORT_CORRECTION.md) | Exact contribution-table changes needed in the progress report |
@@ -33,7 +33,7 @@
 
 ## The one-paragraph handoff
 
-YSB delivered the midterm M2 training/ONNX/evaluation work plus the FastAPI backend and Uni-app H5 client. The local `ml/preprocess`/`data/processed` stack was built because the official M1 preprocessed data was not available in this workspace; it must not be presented as M1's deliverable. The **midterm** 3-epoch/10-ONNX/WHITED-RF results belong to YSB; the **future** M2 improvements are Yang's W5+ scope. The course repo needs the same branch under `handoff/ysb-engineering-midterm`, then the report's `[TBD: YSB backend & mobile commits]` and M2 owner rows can be corrected.
+USP delivered the midterm M2 training/ONNX/evaluation work plus the FastAPI backend and Uni-app H5 client. The local `ml/preprocess`/`data/processed` stack was built because the official M1 preprocessed data was not available in this workspace; it must not be presented as M1's deliverable. The **midterm** 3-epoch/10-ONNX/WHITED-RF results belong to USP; the **future** M2 improvements are Yang's W5+ scope. The course repo needs the same branch under `handoff/usp-engineering-midterm`, then the report's `[TBD: USP backend & mobile commits]` and M2 owner rows can be corrected.
 
 ## Quick start
 

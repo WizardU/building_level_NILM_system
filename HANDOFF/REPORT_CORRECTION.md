@@ -40,19 +40,19 @@ local 8-epoch results. Those are post-report experiments (see `ALGORITHM_PROVISI
 
 Replace:
 
-> `[TBD: YSB backend & mobile commits]`
+> `[TBD: USP backend & mobile commits]`
 
 with:
 
 > U SENGPAN — midterm M2 ML training/ONNX/eval + M3 backend + M5 mobile H5:
-> `handoff/ysb-engineering-midterm`, tag `handoff-ysb-2026-11-25`,
+> `handoff/usp-engineering-midterm`, tag `handoff-usp-2026-11-25`,
 > commit `<short-hash>` (course repo mirror: `<course-commit>`).
 > Evidence: 10 ONNX models, 3-epoch report tables, WHITED RF 44.1%, 21/21 API checks,
 > `report_build/shots/mobile_analytics.png`, `openapi/NILM.json`.
 
 ## 5. M1 / preprocessing
 
-Keep **M1 official preprocessing = Jin Xinyi**. YSB's local `ml/preprocess` + `data/processed` is a
+Keep **M1 official preprocessing = Jin Xinyi**. USP's local `ml/preprocess` + `data/processed` is a
 **fallback copy**, not the official M1 deliverable. The figure "Preprocessing UK-DALE" may be Jin's
 pipeline output; the local window #10000 does not match it exactly (see `ALGORITHM_PROVISIONAL.md` §1).
 

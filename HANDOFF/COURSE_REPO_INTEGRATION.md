@@ -13,10 +13,10 @@
 cd NILM
 git remote add course https://github.com/MUST-BIT-BEIE-FYP-2026/fyp-2026-042.git
 git fetch course
-git checkout -b handoff/ysb-engineering-midterm course/main
+git checkout -b handoff/usp-engineering-midterm course/main
 ```
 
-Copy only YSB-owned paths from this workspace into the course branch:
+Copy only USP-owned paths from this workspace into the course branch:
 
 ```text
 backend/
@@ -32,9 +32,9 @@ Then:
 
 ```powershell
 git add backend mobile openapi scripts HANDOFF
-git commit -m "feat(ysb): backend API + Uni-app H5 handoff and evidence"
-git tag handoff-ysb-2026-11-25
-git push -u course handoff/ysb-engineering-midterm
+git commit -m "feat(usp): backend API + Uni-app H5 handoff and evidence"
+git tag handoff-usp-2026-11-25
+git push -u course handoff/usp-engineering-midterm
 ```
 
 If your identity is not configured:
@@ -52,7 +52,7 @@ git config user.email "<your GitHub email>"
    - `HANDOFF/ENGINEERING_MOBILE.md`;
    - `HANDOFF/EVIDENCE.md`;
    - a ZIP of `backend/`, `mobile/`, `openapi/`, `scripts/smoke_api.py`, `HANDOFF/`.
-3. After they create the course branch, replace `[TBD: YSB backend & mobile commits]` in the report
+3. After they create the course branch, replace `[TBD: USP backend & mobile commits]` in the report
    with the course commit hash.
 
 ## Option C — patch/bundle
@@ -61,27 +61,27 @@ Because the histories differ, a `git format-patch` of this branch only contains 
 not the full backend/mobile tree. Prefer a ZIP/tree copy. If a bundle is required:
 
 ```powershell
-git bundle create ..\NILM_YSB_ENGINEERING_2026-11-25.bundle handoff/ysb-engineering-midterm
+git bundle create ..\NILM_USP_ENGINEERING_2026-11-25.bundle handoff/usp-engineering-midterm
 ```
 
-The course repo can `git fetch <bundle> handoff/ysb-engineering-midterm:handoff/ysb-engineering-midterm`
+The course repo can `git fetch <bundle> handoff/usp-engineering-midterm:handoff/usp-engineering-midterm`
 only if it accepts an unrelated history; otherwise copy the tree.
 
 ## Personal remote push (this workspace)
 
 ```powershell
-git push -u origin handoff/ysb-engineering-midterm
-git push origin handoff-ysb-2026-11-25
+git push -u origin handoff/usp-engineering-midterm
+git push origin handoff-usp-2026-11-25
 ```
 
 If authentication fails, keep the local branch; do not rewrite `origin`.
 
 ## Report line to replace
 
-`[TBD: YSB backend & mobile commits]` →
+`[TBD: USP backend & mobile commits]` →
 
 > U SENGPAN — midterm M2 ML training/ONNX/eval + M3 backend + M5 mobile H5:
-> `handoff/ysb-engineering-midterm`, tag `handoff-ysb-2026-11-25`, commit `<hash>` (course repo).
+> `handoff/usp-engineering-midterm`, tag `handoff-usp-2026-11-25`, commit `<hash>` (course repo).
 > 10 ONNX models, 3-epoch report tables, WHITED RF 44.1%, 21/21 API checks, OpenAPI 38 paths.
 
 Also update the M2 owner row: midterm M2 = U SENGPAN; W5+ improvements = Yang Yifei.

@@ -1,6 +1,6 @@
 # Repository map & ownership
 
-**Base:** `ce8c55c` (main), branch `handoff/ysb-engineering-midterm`.
+**Base:** `ce8c55c` (main), branch `handoff/usp-engineering-midterm`.
 
 | Path | Owner | Status | Notes |
 |---|---|---|---|
@@ -32,7 +32,7 @@
 - `ml/checkpoints/*_mse.pt`, `*_dilated*.pt`, `*_wmse25.pt`
 - `ml/checkpoints/ablation_metrics.json`, `loss_ablation.json`, `cross_house_house2.json`, `metrics_ci.json`
 - `MODEL_EVIDENCE.md`, `NILM_Review_Response_11.25.pptx`
-- These are YSB's post-report experiments; Yang reviews them for the future-improvement track.
+- These are USP's post-report experiments; Yang reviews them for the future-improvement track.
 
 ## Cleanup notes
 

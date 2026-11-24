@@ -1,4 +1,4 @@
-# Engineering, mobile & midterm ML delivery (YSB)
+# Engineering, mobile & midterm ML delivery (USP)
 
 **Scope:** M2 midterm ML training/ONNX/evaluation + M3 FastAPI backend/API + M5 Uni-app mobile H5.  
 **Primary ownership:** mobile client; shared backend/API integration; midterm ML training/ONNX.  
@@ -75,7 +75,7 @@ Login: `admin / admin123` (demo seed).
 | Web Dashboard screenshot | `report_build/shots/web_dashboard_tall.png` |
 | API contract | `openapi/NILM.json`; `python scripts/export_openapi.py` |
 | Replay adapter | `python -m adapters.replay.cli --speed 80 --batch 5` |
-| Local commit/tag | this branch: `handoff/ysb-engineering-midterm` / `handoff-ysb-2026-11-25` |
+| Local commit/tag | this branch: `handoff/usp-engineering-midterm` / `handoff-usp-2026-11-25` |
 
 Smoke output (representative):
 
@@ -100,8 +100,8 @@ all checks passed
 
 ## 5. Handoff steps for the next owner
 
-1. Pull `handoff/ysb-engineering-midterm`.
+1. Pull `handoff/usp-engineering-midterm`.
 2. Start backend and run `scripts/smoke_api.py`; do not change the ONNX contract.
 3. Run `mobile` H5 and verify the four tabs with the seeded data.
 4. If the course repo is separate, copy `backend/`, `mobile/`, `openapi/`, `scripts/smoke_api.py`, and `HANDOFF/` (see `COURSE_REPO_INTEGRATION.md`).
-5. Update the report's `[TBD: YSB backend & mobile commits]` row with the branch + tag + commit hash.
+5. Update the report's `[TBD: USP backend & mobile commits]` row with the branch + tag + commit hash.

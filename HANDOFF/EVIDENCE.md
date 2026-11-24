@@ -1,12 +1,12 @@
 # Evidence index
 
-**Branch:** `handoff/ysb-engineering-midterm`  
-**Tag:** `handoff-ysb-2026-11-25`  
+**Branch:** `handoff/usp-engineering-midterm`  
+**Tag:** `handoff-usp-2026-11-25`  
 **Local commit:** run `git rev-parse --short HEAD` on the branch (the hash is also reported in the handoff message).  
 **Base:** `ce8c55c` (main, 2026-11-25), tag `review-response-2026-11-25`  
 **Course repo:** `MUST-BIT-BEIE-FYP-2026/fyp-2026-042` — not configured as a git remote in this workspace.
 
-## 1. Engineering evidence (YSB)
+## 1. Engineering evidence (USP)
 
 | # | Evidence | Command / path | Expected |
 |---|---|---|---|
@@ -18,7 +18,7 @@
 | E6 | Mobile H5 run | `cd mobile && npm run dev:h5` | H5 page loads, 4 tabs |
 | E7 | Replay | `python -m adapters.replay.cli --speed 80 --batch 5` | dashboard timestamps advance |
 
-## 2. Midterm ML evidence (YSB-owned)
+## 2. Midterm ML evidence (USP-owned)
 
 | # | Evidence | Path |
 |---|---|---|
@@ -73,10 +73,10 @@ If the model artifacts are absent, `/readyz` falls back to `heuristic`; do not c
 
 ## 6. Report update text (ready to paste)
 
-Replace the `[TBD: YSB backend & mobile commits]` row with:
+Replace the `[TBD: USP backend & mobile commits]` row with:
 
 > U SENGPAN — midterm M2 ML training/ONNX/eval + M3 backend + M5 mobile H5:
-> branch `handoff/ysb-engineering-midterm`, tag `handoff-ysb-2026-11-25`,
+> branch `handoff/usp-engineering-midterm`, tag `handoff-usp-2026-11-25`,
 > commit `<short-hash>` (course repo mirror: `<course-commit>`).
 > Evidence: 10 ONNX models, 3-epoch report tables, WHITED RF 44.1%, 21/21 `scripts/smoke_api.py`,
 > `report_build/shots/mobile_analytics.png`, `openapi/NILM.json`.

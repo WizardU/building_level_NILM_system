@@ -1,7 +1,7 @@
-# Midterm ML work (YSB) → future improvement handoff (Yang)
+# Midterm ML work (USP) → future improvement handoff (Yang)
 
 > **Ownership correction:** the ML training, ONNX export, evaluation and WHITED RF baseline that are in the
-> midterm progress report are **U SENGPAN's work**. They are no longer labelled "not YSB's contribution".
+> midterm progress report are **U SENGPAN's work**. They are no longer labelled "not USP's contribution".
 > The **future improvements** in W5+ (dilated/Huber, 3-seed, cross-house, REDD/PLAID, WHITED CNN) are handed
 > to Yang Yifei. M1 official preprocessing remains Jin Xinyi's.
 
@@ -28,7 +28,7 @@ So: **local preprocessing exists and is methodologically equivalent, but it is n
 M1 artifact.** Do not put the local `data/processed` in the report as Jin's M1 deliverable. If the figure came
 from Jin's pipeline, the local copy must be replaced before final experiments.
 
-## 2. What is YSB's midterm ML work (owned)
+## 2. What is USP's midterm ML work (owned)
 
 - `ml/models/seq2point.py`: baseline, dilated, attention definitions
 - `ml/train/train_one.py`, `train_all.py`: training loop, validation loss, threshold calibration
@@ -66,7 +66,7 @@ The local 8-epoch experiments can be given to Yang as a starting point, but Yang
 | Report currently says | Should say |
 |---|---|
 | M2 model/eval owner = Yang Yifei | **Midterm M2 training/ONNX/WHITED = U SENGPAN; W5+ improvements = Yang Yifei** |
-| `[TBD: YSB backend & mobile commits]` | branch/tag/commit evidence (see `EVIDENCE.md`) |
+| `[TBD: USP backend & mobile commits]` | branch/tag/commit evidence (see `EVIDENCE.md`) |
 | "SQLite/PostgreSQL + Redis", "18.64 ms" | SQLite only; 40–75 ms measured locally |
 | WHITED "Hilbert V-I trajectories" | local baseline uses 19 handcrafted features + RF; official Hilbert pipeline must come from M1/M2 owner |
 
@@ -81,7 +81,7 @@ The local 8-epoch experiments can be given to Yang as a starting point, but Yang
 
 ## 7. Handoff checklist
 
-- [ ] YSB keeps the midterm 3-epoch/10-ONNX/WHITED-RF claim in the report.
+- [ ] USP keeps the midterm 3-epoch/10-ONNX/WHITED-RF claim in the report.
 - [ ] Report contribution table updated: midterm M2 = U SENGPAN; W5+ M2 = Yang.
 - [ ] Yang receives `ml/` code, local `data/processed` path, and `MODEL_EVIDENCE.md`.
 - [ ] Jin confirms official M1 preprocessing path; local copy is not used as M1 evidence.
