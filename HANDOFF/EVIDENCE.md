@@ -18,16 +18,17 @@
 | E6 | Mobile H5 run | `cd mobile && npm run dev:h5` | H5 page loads, 4 tabs |
 | E7 | Replay | `python -m adapters.replay.cli --speed 80 --batch 5` | dashboard timestamps advance |
 
-## 2. Midterm ML evidence (USP-owned)
+## 2. Midterm ML evidence (USP-owned, 8 epoch)
 
 | # | Evidence | Path |
 |---|---|---|
 | M1 | Midterm 10 ONNX models (5 attention + 5 baseline) | `ml/checkpoints/*.onnx` (gitignored; local restore) |
-| M2 | Midterm 3-epoch results / report tables | `FYP-042Progress Report (1).docx` §3–§4 |
+| M2 | 8-epoch results / current tables | `ml/checkpoints/ablation_metrics.json`, `MODEL_EVIDENCE.md` |
 | M3 | WHITED RF baseline (44.1% top-1, 18/40 classes) | `ml/checkpoints/whited_metrics.json` |
 | M4 | Training/eval code | `ml/models/seq2point.py`, `ml/train/train_one.py`, `ml/eval/evaluate.py` |
+| M5 | Audit of epoch claims | `HANDOFF/EVIDENCE_AUDIT.md` |
 
-## 3. Post-report improvement evidence (handoff to Yang)
+## 3. Additional 8-epoch evidence (same completed artifacts)
 
 | # | Evidence | Path |
 |---|---|---|
@@ -39,8 +40,9 @@
 | A6 | Written summary | `MODEL_EVIDENCE.md` |
 | A7 | Commit/tag | `midterm-2026-11-30-evidence` / `72ed7bf` (main run) |
 
-> These are post-report experiments. The **midterm** report keeps its 3-epoch numbers; these 8-epoch results
-> are for Yang's future-improvement track and must not silently replace the midterm table.
+> The Progress Report's 3-epoch text is **stale**; all current histories are 8 steps. Replace the report
+> numbers using `REPORT_CORRECTION.md`. Do not keep both 3-epoch and 8-epoch versions as current evidence.
+> The 8-epoch numbers are not a "post-report" alternative; they are what is completed now.
 
 ## 4. What not to commit
 
@@ -78,7 +80,7 @@ Replace the `[TBD: USP backend & mobile commits]` row with:
 > U SENGPAN — midterm M2 ML training/ONNX/eval + M3 backend + M5 mobile H5:
 > branch `handoff/usp-engineering-midterm`, tag `handoff-usp-2026-11-25`,
 > commit `<short-hash>` (course repo mirror: `<course-commit>`).
-> Evidence: 10 ONNX models, 3-epoch report tables, WHITED RF 44.1%, 21/21 `scripts/smoke_api.py`,
+> Evidence: 10 ONNX models, 8-epoch tables, WHITED RF 44.1%, 21/21 `scripts/smoke_api.py`,
 > `report_build/shots/mobile_analytics.png`, `openapi/NILM.json`.
 
 Also change the M2 owner wording (see [REPORT_CORRECTION.md](REPORT_CORRECTION.md)):

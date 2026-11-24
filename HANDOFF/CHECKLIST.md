@@ -33,8 +33,9 @@
 - [ ] Yang has read `ALGORITHM_PROVISIONAL.md` and `REPORT_CORRECTION.md`.
 - [ ] Yang understands the midterm M2 training/ONNX is USP's; his scope is W5+ improvements.
 - [ ] Yang has the local `data/processed` or will replace it with M1's official data.
-- [ ] Yang has reviewed the 8-epoch MSE vs report's 3-epoch numbers.
-- [ ] Yang accepts/rejects the post-report experiments in writing (commit message/issue).
+- [ ] Report 3-epoch text replaced by 8-epoch values (`REPORT_CORRECTION.md`).
+- [ ] Yang has reviewed the 8-epoch MSE results and the corrected report tables.
+- [ ] Yang accepts/rejects the future-improvement scope in writing (commit message/issue).
 - [ ] USP stops changing `ml/` after the handoff tag.
 
 ## Handoff to Jin

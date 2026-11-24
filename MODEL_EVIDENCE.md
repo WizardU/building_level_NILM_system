@@ -1,6 +1,6 @@
 # Model evidence — 2026-11-20
 
-Evidence commit: `f6a643e` · tag: `midterm-2026-11-30-evidence`.
+Evidence commit: `72ed7bf` · tag: `midterm-2026-11-30-evidence`.
 
 All numbers are test-set values. The three models below use **MSE** (the proposal's baseline loss), same 8 epochs and seed 42; the loss ablation is separate.
 

@@ -33,7 +33,7 @@
 
 ## The one-paragraph handoff
 
-USP delivered the midterm M2 training/ONNX/evaluation work plus the FastAPI backend and Uni-app H5 client. The local `ml/preprocess`/`data/processed` stack was built because the official M1 preprocessed data was not available in this workspace; it must not be presented as M1's deliverable. The **midterm** 3-epoch/10-ONNX/WHITED-RF results belong to USP; the **future** M2 improvements are Yang's W5+ scope. The course repo needs the same branch under `handoff/usp-engineering-midterm`, then the report's `[TBD: USP backend & mobile commits]` and M2 owner rows can be corrected.
+USP delivered the midterm M2 training/ONNX/evaluation work plus the FastAPI backend and Uni-app H5 client. The local `ml/preprocess`/`data/processed` stack was built because the official M1 preprocessed data was not available in this workspace; it must not be presented as M1's deliverable. The **midterm** 8-epoch/10-ONNX/WHITED-RF results belong to USP; the **future** M2 improvements are Yang's W5+ scope. The report's 3-epoch text is stale and must be replaced using `REPORT_CORRECTION.md`. The course repo needs the same branch under `handoff/usp-engineering-midterm`.
 
 ## Quick start
 
